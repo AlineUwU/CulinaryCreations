@@ -132,65 +132,169 @@ function calculateAll() {
 
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    let y = 10;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
 
-    doc.setFontSize(16);
-    doc.text("Reporte de Costos de Receta", 20, y);
-    y += 10;
+    const marginLeft = 40;
+    let y = 40;
 
+    // Título
+    doc.setFontSize(18);
+    doc.setFont(undefined, 'bold');
+    doc.text("REPORTE DE COSTOS DE RECETA", marginLeft, y);
+    y += 25;
+
+    // Fecha actual
+    const fecha = new Date().toLocaleDateString();
     doc.setFontSize(12);
-    doc.text("Ingredientes Regulares:", 20, y);
-    y += 6;
+    doc.setFont(undefined, 'normal');
+    doc.text(`Fecha: ${fecha}`, marginLeft, y);
+    y += 15;
 
+    // Línea separadora
+    doc.setLineWidth(0.5);
+    doc.line(marginLeft, y, 550, y);
+    y += 20;
+
+    // --- INGREDIENTES ---
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(14);
+    doc.text("INGREDIENTES", marginLeft, y);
+    y += 20;
+
+    // Tabla encabezado ingredientes
+    doc.setFontSize(11);
+    const ingredientesHeader = ["Ingrediente", "Cantidad", "Masa (ml/g)", "Costo Unit", "Costo Total"];
+    const colWidths = [180, 60, 70, 70, 70];
+    let x = marginLeft;
+
+    // Encabezados negrita
+    ingredientesHeader.forEach((txt, i) => {
+        doc.text(txt, x + 2, y);
+        x += colWidths[i];
+    });
+    y += 15;
+    doc.setLineWidth(0.3);
+    doc.line(marginLeft, y - 8, marginLeft + colWidths.reduce((a,b) => a + b, 0), y - 8);
+
+    doc.setFont(undefined, 'normal');
+
+    // Datos ingredientes
     const regularRows = document.querySelectorAll('.ingredient-row');
-    regularRows.forEach((row, index) => {
-        const nombre = row.children[0].value || '';
-        const cantidad = row.children[1].value || '0';
-        const masa = row.children[2].value || '0';
-        const costoUnitario = row.children[3].value || '0';
-        const costoTotal = row.querySelector('.cost-display')?.textContent || '$0.00';
+    regularRows.forEach(row => {
+        x = marginLeft;
+        const nombre = row.children[0].value || "-";
+        const cantidad = row.children[1].value || "0";
+        const masa = row.children[2].value || "0";
+        const costoUnit = row.children[3].value || "0";
+        const costoTotal = row.querySelector('.cost-display').textContent || "$0.00";
 
-        doc.text(`${index + 1}. ${nombre} - ${cantidad} x $${costoUnitario} = ${costoTotal}`, 20, y);
-        y += 6;
+        const values = [nombre, cantidad, masa, `$${parseFloat(costoUnit).toFixed(2)}`, costoTotal];
+        values.forEach((txt, i) => {
+            doc.text(String(txt), x + 2, y);
+            x += colWidths[i];
+        });
+        y += 15;
     });
 
-    y += 4;
-    doc.text("Ingredientes Especiales:", 20, y);
-    y += 6;
+    y += 15;
 
+    // --- INGREDIENTES ESPECIALES ---
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(14);
+    doc.text("INGREDIENTES ESPECIALES", marginLeft, y);
+    y += 20;
+
+    // Tabla encabezado ingredientes especiales
+    const specialHeader = ["Ingrediente", "Precio", "Contenido", "Usado", "Masa (ml/g)", "Costo Prop"];
+    const specialColWidths = [140, 50, 60, 50, 70, 70];
+    x = marginLeft;
+
+    specialHeader.forEach((txt, i) => {
+        doc.text(txt, x + 2, y);
+        x += specialColWidths[i];
+    });
+    y += 15;
+    doc.line(marginLeft, y - 8, marginLeft + specialColWidths.reduce((a,b) => a + b, 0), y - 8);
+
+    doc.setFont(undefined, 'normal');
+
+    // Datos especiales
     const specialRows = document.querySelectorAll('.special-ingredient-row');
-    specialRows.forEach((row, index) => {
-        const nombre = row.children[0].value || '';
-        const precioPaq = row.children[1].value || '0';
-        const contenido = row.children[2].value || '0';
-        const usado = row.children[3].value || '0';
-        const proporcional = row.querySelector('.special-cost-display')?.textContent || '$0.00';
+    specialRows.forEach(row => {
+        x = marginLeft;
+        const nombre = row.children[0].value || "-";
+        const precio = row.children[1].value || "0";
+        const contenido = row.children[2].value || "0";
+        const usado = row.children[3].value || "0";
+        const masa = row.children[4].value || "0";
+        const costoProp = row.querySelector('.special-cost-display').textContent || "$0.00";
 
-        doc.text(`${index + 1}. ${nombre} - ${usado}g de ${contenido}g = ${proporcional}`, 20, y);
-        y += 6;
+        const values = [nombre, `$${parseFloat(precio).toFixed(2)}`, contenido, usado, masa, costoProp];
+        values.forEach((txt, i) => {
+            doc.text(String(txt), x + 2, y);
+            x += specialColWidths[i];
+        });
+        y += 15;
     });
 
-    y += 6;
-    doc.text("Resumen de Costos:", 20, y);
-    y += 6;
-    doc.text(`Total ingredientes: ${document.getElementById('totalIngredientsCost').textContent}`, 20, y);
-    y += 6;
-    doc.text(`Monto añadido: ${document.getElementById('addedAmount').textContent}`, 20, y);
-    y += 6;
-    doc.text(`Total costos: ${document.getElementById('totalCosts').textContent}`, 20, y);
-    y += 6;
+    y += 15;
 
-    doc.text("Precios y Ganancia:", 20, y);
-    y += 6;
-    doc.text(`Costo unitario: ${document.getElementById('unitCost').textContent}`, 20, y);
-    y += 6;
-    doc.text(`Ganancia por unidad: ${document.getElementById('profitPerUnit').textContent}`, 20, y);
-    y += 6;
-    doc.text(`Precio de venta unitario: ${document.getElementById('sellingPrice').textContent}`, 20, y);
-    y += 6;
+    // --- CONFIGURACIÓN ---
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(14);
+    doc.text("CONFIGURACIÓN", marginLeft, y);
+    y += 20;
+    doc.setFont(undefined, 'normal');
+    const unidades = document.getElementById('unitsYield').value || "1";
+    const añadido = document.getElementById('addedPercentage').value || "0";
+    const ganancia = document.getElementById('profitPercentage').value || "0";
+    doc.text(`Unidades a producir: ${unidades}`, marginLeft, y);
+    y += 15;
+    doc.text(`Porcentaje añadido: ${añadido}%`, marginLeft, y);
+    y += 15;
+    doc.text(`Porcentaje ganancia: ${ganancia}%`, marginLeft, y);
+    y += 25;
 
-    doc.text(`Total masa: ${document.getElementById('totalMass').textContent} ml/g`, 20, y);
+    // --- ANÁLISIS DE COSTOS ---
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(14);
+    doc.text("ANÁLISIS DE COSTOS", marginLeft, y);
+    y += 20;
+    doc.setFont(undefined, 'normal');
 
-    doc.save('reporte.pdf');
+    const totalIng = document.getElementById('totalIngredientsCost').textContent || "$0.00";
+    const montoAñadido = document.getElementById('addedAmount').textContent || "$0.00";
+    const totalCostos = document.getElementById('totalCosts').textContent || "$0.00";
+
+    doc.text(`Total ingredientes: ${totalIng}`, marginLeft, y);
+    y += 15;
+    doc.text(`Monto añadido: ${montoAñadido}`, marginLeft, y);
+    y += 15;
+    doc.text(`Total costos: ${totalCostos}`, marginLeft, y);
+    y += 25;
+
+    // --- PRECIO DE VENTA UNITARIO ---
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(14);
+    doc.text("PRECIO DE VENTA UNITARIO", marginLeft, y);
+    y += 20;
+    doc.setFont(undefined, 'normal');
+
+    const costoUnit = document.getElementById('unitCost').textContent || "$0.00";
+    const gananciaUnidad = document.getElementById('profitPerUnit').textContent || "$0.00";
+    const precioVenta = document.getElementById('sellingPrice').textContent || "$0.00";
+
+    doc.text(`Costo unitario: ${costoUnit}`, marginLeft, y);
+    y += 15;
+    doc.text(`Ganancia por unidad: ${gananciaUnidad}`, marginLeft, y);
+    y += 15;
+    doc.text(`Precio de venta: ${precioVenta}`, marginLeft, y);
+    y += 25;
+
+    // Masa total
+    const masaTotal = document.getElementById('totalMass').textContent || "0";
+    doc.text(`Masa total: ${masaTotal} ml/g`, marginLeft, y);
+
+    // Guardar PDF
+    doc.save("reporte-costos.pdf");
 }
