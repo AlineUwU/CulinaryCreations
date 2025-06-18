@@ -1,0 +1,59 @@
+/* Animación de entrada suave */
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilo para hover de filas de ingredientes */
+.ingredient-row {
+    transition: background-color 0.3s ease;
+}
+.ingredient-row:hover {
+    background-color: rgba(93, 92, 222, 0.05); /* Tailwind primary claro */
+}
+.dark .ingredient-row:hover {
+    background-color: rgba(93, 92, 222, 0.1);
+}
+
+/* Inputs personalizados si deseas aplicar un estilo unificado */
+input[type="number"],
+input[type="text"] {
+    transition: border-color 0.2s ease;
+}
+input[type="number"]:focus,
+input[type="text"]:focus {
+    border-color: #5D5CDE; /* primary */
+    outline: none;
+}
+
+/* Botones destacados */
+button {
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+button:active {
+    transform: scale(0.98);
+}
+
+/* Modo claro y oscuro */
+body {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Scroll personalizado */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(93, 92, 222, 0.4); 
+    border-radius: 4px;
+}
+.dark ::-webkit-scrollbar-thumb {
+    background-color: rgba(93, 92, 222, 0.6);
+}
