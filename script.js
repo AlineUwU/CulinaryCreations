@@ -132,7 +132,35 @@ function calculateAll() {
 
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
-    pdf.text('Reporte PDF pendiente de implementar.', 20, 20);
-    pdf.save('reporte.pdf');
+    const doc = new jsPDF();
+
+    let y = 10;
+
+    doc.setFontSize(16);
+    doc.text("Reporte de Costos de Receta", 20, y);
+    y += 10;
+
+    doc.setFontSize(12);
+    doc.text("Costos Totales:", 20, y);
+    y += 8;
+    doc.text(`- Ingredientes: ${document.getElementById('totalIngredientsCost').textContent}`, 20, y);
+    y += 6;
+    doc.text(`- Añadido (%): ${document.getElementById('addedAmount').textContent}`, 20, y);
+    y += 6;
+    doc.text(`- Total: ${document.getElementById('totalCosts').textContent}`, 20, y);
+    y += 10;
+
+    doc.text("Cálculos Unitarios:", 20, y);
+    y += 8;
+    doc.text(`- Costo Unitario: ${document.getElementById('unitCost').textContent}`, 20, y);
+    y += 6;
+    doc.text(`- Ganancia x Unidad: ${document.getElementById('profitPerUnit').textContent}`, 20, y);
+    y += 6;
+    doc.text(`- Precio Venta: ${document.getElementById('sellingPrice').textContent}`, 20, y);
+    y += 10;
+
+    doc.text(`Total de masa (ml/g): ${document.getElementById('totalMass').textContent}`, 20, y);
+
+    doc.save('reporte.pdf');
 }
+
