@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Costos de Recetas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .ingredient-row {
+            transition: all 0.3s ease;
+        }
+        .ingredient-row:hover {
+            background-color: rgba(93, 92, 222, 0.05);
+        }
+        .dark .ingredient-row:hover {
+            background-color: rgba(93, 92, 222, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-primary mb-2">Calculadora de Costos de Recetas</h1>
+            <p class="text-gray-600 dark:text-gray-400">Calcula costos, márgenes y precios de venta de manera profesional</p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Ingredientes Section -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Ingredientes Regulares -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold">Ingredientes Regulares</h2>
+                        <button id="addIngredientBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
+                            + Agregar Ingrediente
+                        </button>
+                    </div>
+
+                    <!-- Ingredientes Header -->
+                    <div class="grid grid-cols-12 gap-2 mb-4 text-sm font-medium text-gray-600 dark:text-gray-400 border-b pb-2">
+                        <div class="col-span-4">Ingrediente</div>
+                        <div class="col-span-2">Cantidad</div>
+                        <div class="col-span-2">Masa (ml/g)</div>
+                        <div class="col-span-2">Costo Unit.</div>
+                        <div class="col-span-1">Costo Total</div>
+                        <div class="col-span-1"></div>
+                    </div>
+
+                    <!-- Ingredientes List -->
+                    <div id="ingredientsList" class="space-y-2">
+                        <!-- Ingredientes iniciales -->
+                        <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
+                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="Producto lácteo">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="5" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="1000" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="12" min="0" step="0.01">
+                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$60.00</span>
+                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
+                        </div>
+                        <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
+                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="Leche en polvo">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="120" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="20" min="0" step="0.01">
+                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$20.00</span>
+                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
+                        </div>
+                        <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
+                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="Crema para batir">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="500" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="50" min="0" step="0.01">
+                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$50.00</span>
+                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ingredientes Especiales -->
+                <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-xl font-semibold text-orange-800 dark:text-orange-200">Ingredientes Especiales</h2>
+                            <p class="text-sm text-orange-600 dark:text-orange-300">Para ingredientes a granel (ej: $80 por 250g, usas 7g)</p>
+                        </div>
+                        <button id="addSpecialIngredientBtn" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
+                            + Agregar Especial
+                        </button>
+                    </div>
+
+                    <!-- Ingredientes Especiales Header -->
+                    <div class="grid grid-cols-16 gap-2 mb-4 text-sm font-medium text-orange-700 dark:text-orange-300 border-b border-orange-200 dark:border-orange-700 pb-2">
+                        <div class="col-span-4">Ingrediente</div>
+                        <div class="col-span-2">Precio Paquete</div>
+                        <div class="col-span-2">Contenido Paq.</div>
+                        <div class="col-span-2">Cantidad Usada</div>
+                        <div class="col-span-2">Masa (ml/g)</div>
+                        <div class="col-span-2">Costo Proporcional</div>
+                        <div class="col-span-1">Costo Total</div>
+                        <div class="col-span-1"></div>
+                    </div>
+
+                    <!-- Ingredientes Especiales List -->
+                    <div id="specialIngredientsList" class="space-y-2">
+                        <!-- Ejemplo inicial: Grenetina -->
+                        <div class="special-ingredient-row grid grid-cols-16 gap-2 items-center py-2 rounded-lg">
+                            <input type="text" class="col-span-4 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="Nombre del ingrediente" value="Grenetina">
+                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="$0.00" value="80" min="0" step="0.01">
+                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="250g" value="250" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="7g" value="7" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="ml/g" value="7" min="0" step="0.1">
+                            <span class="col-span-2 text-sm font-medium text-orange-700 dark:text-orange-300 proportional-cost">$2.24</span>
+                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 special-cost-display">$2.24</span>
+                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-special-ingredient p-1">✕</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculations Section -->
+            <div class="space-y-6">
+                <!-- Configuración -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Configuración</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Unidades que rinde</label>
+                            <input type="number" id="unitsYield" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="40" min="1">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">% Añadido</label>
+                            <input type="number" id="addedPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="30" min="0" step="0.1">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">% Beneficio esperado</label>
+                            <input type="number" id="profitPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="150" min="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados -->
+                <div class="bg-primary/10 dark:bg-primary/20 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Análisis de Costos</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-sm">Total costos ingredientes:</span>
+                            <span class="font-bold" id="totalIngredientsCost">$130.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Monto añadido:</span>
+                            <span class="font-bold" id="addedAmount">$39.00</span>
+                        </div>
+                        <div class="flex justify-between border-t pt-2">
+                            <span class="text-sm font-medium">Total costos:</span>
+                            <span class="font-bold" id="totalCosts">$169.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Costo unitario:</span>
+                            <span class="font-bold" id="unitCost">$4.23</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm">Ganancia por unidad:</span>
+                            <span class="font-bold text-green-600" id="profitPerUnit">$6.34</span>
+                        </div>
+                        <div class="flex justify-between border-t pt-2">
+                            <span class="text-sm font-medium">Precio de venta unitario:</span>
+                            <span class="font-bold text-lg text-primary" id="sellingPrice">$10.57</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen de masa -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                    <h3 class="text-lg font-semibold mb-4">Resumen de Masa</h3>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-primary" id="totalMass">1620</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">ml/g totales</div>
+                    </div>
+                </div>
+
+                <!-- Export PDF Button -->
+                <div class="text-center">
+                    <button id="exportPdfBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-lg">
+                        📄 Exportar a PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // DOM elements
+        const ingredientsList = document.getElementById('ingredientsList');
+        const addIngredientBtn = document.getElementById('addIngredientBtn');
+        const specialIngredientsList = document.getElementById('specialIngredientsList');
+        const addSpecialIngredientBtn = document.getElementById('addSpecialIngredientBtn');
+        const unitsYield = document.getElementById('unitsYield');
+        const addedPercentage = document.getElementById('addedPercentage');
+        const profitPercentage = document.getElementById('profitPercentage');
+
+        // Add event listeners
+        addIngredientBtn.addEventListener('click', addIngredient);
+        addSpecialIngredientBtn.addEventListener('click', addSpecialIngredient);
+        unitsYield.addEventListener('input', calculateAll);
+        addedPercentage.addEventListener('input', calculateAll);
+        profitPercentage.addEventListener('input', calculateAll);
+        document.getElementById('exportPdfBtn').addEventListener('click', exportToPDF);
+
+        function addIngredient() {
+            const ingredientRow = document.createElement('div');
+            ingredientRow.className = 'ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg';
+            ingredientRow.innerHTML = `
+                <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente">
+                <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.1">
+                <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="0" min="0" step="0.1">
+                <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="0" min="0" step="0.01">
+                <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$0.00</span>
+                <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
+            `;
+            ingredientsList.appendChild(ingredientRow);
+            
+            // Add event listeners to new inputs
+            const inputs = ingredientRow.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => input.addEventListener('input', calculateAll));
+            
+            // Add remove functionality
+            const removeBtn = ingredientRow.querySelector('.remove-ingredient');
+            removeBtn.addEventListener('click', () => {
+                ingredientRow.remove();
+                calculateAll();
+            });
+        }
+
+        function addSpecialIngredient() {
+            const specialRow = document.createElement('div');
+            specialRow.className = 'special-ingredient-row grid grid-cols-16 gap-2 items-center py-2 rounded-lg';
+            specialRow.innerHTML = `
+                <input type="text" class="col-span-4 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="Nombre del ingrediente">
+                <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="$0.00" value="0" min="0" step="0.01">
+                <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="250g" value="1" min="0" step="0.1">
+                <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="7g" value="1" min="0" step="0.1">
+                <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="ml/g" value="1" min="0" step="0.1">
+                <span class="col-span-2 text-sm font-medium text-orange-700 dark:text-orange-300 proportional-cost">$0.00</span>
+                <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 special-cost-display">$0.00</span>
+                <button class="col-span-1 text-red-500 hover:text-red-700 remove-special-ingredient p-1">✕</button>
+            `;
+            specialIngredientsList.appendChild(specialRow);
+            
+            // Add event listeners to new inputs
+            const inputs = specialRow.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => input.addEventListener('input', calculateAll));
+            
+            // Add remove functionality
+            const removeBtn = specialRow.querySelector('.remove-special-ingredient');
+            removeBtn.addEventListener('click', () => {
+                specialRow.remove();
+                calculateAll();
+            });
+        }
+
+        function calculateAll() {
+            const rows = document.querySelectorAll('.ingredient-row');
+            const specialRows = document.querySelectorAll('.special-ingredient-row');
+            let totalIngredientsCost = 0;
+            let totalMass = 0;
+
+            // Calculate regular ingredient costs and totals
+            rows.forEach(row => {
+                const quantity = parseFloat(row.children[1].value) || 0;
+                const mass = parseFloat(row.children[2].value) || 0;
+                const unitCost = parseFloat(row.children[3].value) || 0;
+                const cost = quantity * unitCost;
+                
+                row.querySelector('.cost-display').textContent = `$${cost.toFixed(2)}`;
+                totalIngredientsCost += cost;
+                totalMass += mass * quantity;
+            });
+
+            // Calculate special ingredient costs and totals
+            specialRows.forEach(row => {
+                const packagePrice = parseFloat(row.children[1].value) || 0;
+                const packageContent = parseFloat(row.children[2].value) || 1;
+                const usedQuantity = parseFloat(row.children[3].value) || 0;
+                const mass = parseFloat(row.children[4].value) || 0;
+                
+                // Calculate proportional cost: (package_price * used_quantity) / package_content
+                const proportionalCost = (packagePrice * usedQuantity) / packageContent;
+                const totalCost = proportionalCost; // Para ingredientes especiales, el costo proporcional ES el costo total
+                
+                row.querySelector('.proportional-cost').textContent = `$${proportionalCost.toFixed(2)}`;
+                row.querySelector('.special-cost-display').textContent = `$${totalCost.toFixed(2)}`;
+                
+                totalIngredientsCost += totalCost;
+                totalMass += mass;
+            });
+
+            // Get configuration values
+            const units = parseFloat(unitsYield.value) || 1;
+            const addedPercent = parseFloat(addedPercentage.value) || 0;
+            const profitPercent = parseFloat(profitPercentage.value) || 0;
+
+            // Calculate derived values
+            const addedAmount = totalIngredientsCost * addedPercent / 100;
+            const totalCosts = totalIngredientsCost + addedAmount;
+            const unitCost = totalCosts / units;
+            const profitPerUnit = unitCost * profitPercent / 100;
+            const sellingPrice = unitCost + profitPerUnit;
+
+            // Update display
+            document.getElementById('totalIngredientsCost').textContent = `$${totalIngredientsCost.toFixed(2)}`;
+            document.getElementById('addedAmount').textContent = `$${addedAmount.toFixed(2)}`;
+            document.getElementById('totalCosts').textContent = `$${totalCosts.toFixed(2)}`;
+            document.getElementById('unitCost').textContent = `$${unitCost.toFixed(2)}`;
+            document.getElementById('profitPerUnit').textContent = `$${profitPerUnit.toFixed(2)}`;
+            document.getElementById('sellingPrice').textContent = `$${sellingPrice.toFixed(2)}`;
+            document.getElementById('totalMass').textContent = totalMass.toFixed(0);
+        }
+
+        // Initialize event listeners for existing ingredients
+        document.addEventListener('DOMContentLoaded', () => {
+            const existingInputs = document.querySelectorAll('.ingredient-row input[type="number"]');
+            existingInputs.forEach(input => input.addEventListener('input', calculateAll));
+
+            const existingSpecialInputs = document.querySelectorAll('.special-ingredient-row input[type="number"]');
+            existingSpecialInputs.forEach(input => input.addEventListener('input', calculateAll));
+
+            const removeButtons = document.querySelectorAll('.remove-ingredient');
+            removeButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.target.closest('.ingredient-row').remove();
+                    calculateAll();
+                });
+            });
+
+            const removeSpecialButtons = document.querySelectorAll('.remove-special-ingredient');
+            removeSpecialButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.target.closest('.special-ingredient-row').remove();
+                    calculateAll();
+                });
+            });
+
+            // Initial calculation
+            calculateAll();
+        });
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            // Get current date
+            const currentDate = new Date().toLocaleDateString('es-ES');
+            
+            // Header
+            pdf.setFontSize(20);
+            pdf.setFont("helvetica", "bold");
+            pdf.text('REPORTE DE COSTOS DE RECETA', 20, 25);
+            
+            pdf.setFontSize(12);
+            pdf.setFont("helvetica", "normal");
+            pdf.text(`Fecha: ${currentDate}`, 20, 35);
+            
+            // Line separator
+            pdf.line(20, 45, 190, 45);
+            
+            // Ingredients section
+            let yPosition = 55;
+            pdf.setFontSize(14);
+            pdf.setFont("helvetica", "bold");
+            pdf.text('INGREDIENTES', 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "bold");
+            pdf.text('Ingrediente', 20, yPosition);
+            pdf.text('Cantidad', 80, yPosition);
+            pdf.text('Masa (ml/g)', 110, yPosition);
+            pdf.text('Costo Unit.', 140, yPosition);
+            pdf.text('Costo Total', 170, yPosition);
+            
+            // Draw line under headers
+            pdf.line(20, yPosition + 2, 190, yPosition + 2);
+            
+            yPosition += 8;
+            pdf.setFont("helvetica", "normal");
+            
+            // Get regular ingredients data
+            const rows = document.querySelectorAll('.ingredient-row');
+            rows.forEach(row => {
+                const name = row.children[0].value || 'Sin nombre';
+                const quantity = row.children[1].value || '0';
+                const mass = row.children[2].value || '0';
+                const unitCost = row.children[3].value || '0';
+                const totalCost = row.querySelector('.cost-display').textContent;
+                
+                // Check if we need a new page
+                if (yPosition > 270) {
+                    pdf.addPage();
+                    yPosition = 25;
+                }
+                
+                pdf.text(name.substring(0, 25), 20, yPosition);
+                pdf.text(quantity, 80, yPosition);
+                pdf.text(mass, 110, yPosition);
+                pdf.text(`$${unitCost}`, 140, yPosition);
+                pdf.text(totalCost, 170, yPosition);
+                yPosition += 8;
+            });
+
+            // Special ingredients section
+            const specialRows = document.querySelectorAll('.special-ingredient-row');
+            if (specialRows.length > 0) {
+                yPosition += 10;
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(14);
+                pdf.text('INGREDIENTES ESPECIALES', 20, yPosition);
+                
+                yPosition += 10;
+                pdf.setFontSize(10);
+                pdf.text('Ingrediente', 20, yPosition);
+                pdf.text('Precio Paq.', 80, yPosition);
+                pdf.text('Contenido', 110, yPosition);
+                pdf.text('Usado', 140, yPosition);
+                pdf.text('Costo Total', 170, yPosition);
+                
+                // Draw line under headers
+                pdf.line(20, yPosition + 2, 190, yPosition + 2);
+                
+                yPosition += 8;
+                pdf.setFont("helvetica", "normal");
+                
+                specialRows.forEach(row => {
+                    const name = row.children[0].value || 'Sin nombre';
+                    const packagePrice = row.children[1].value || '0';
+                    const packageContent = row.children[2].value || '0';
+                    const usedQuantity = row.children[3].value || '0';
+                    const totalCost = row.querySelector('.special-cost-display').textContent;
+                    
+                    // Check if we need a new page
+                    if (yPosition > 270) {
+                        pdf.addPage();
+                        yPosition = 25;
+                    }
+                    
+                    pdf.text(name.substring(0, 25), 20, yPosition);
+                    pdf.text(`$${packagePrice}`, 80, yPosition);
+                    pdf.text(packageContent, 110, yPosition);
+                    pdf.text(usedQuantity, 140, yPosition);
+                    pdf.text(totalCost, 170, yPosition);
+                    yPosition += 8;
+                });
+            }
+            
+            // Configuration section
+            yPosition += 10;
+            pdf.line(20, yPosition, 190, yPosition);
+            yPosition += 10;
+            
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text('CONFIGURACIÓN', 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "normal");
+            
+            const units = document.getElementById('unitsYield').value;
+            const addedPercent = document.getElementById('addedPercentage').value;
+            const profitPercent = document.getElementById('profitPercentage').value;
+            
+            pdf.text(`Unidades que rinde: ${units}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Porcentaje añadido: ${addedPercent}%`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Beneficio esperado: ${profitPercent}%`, 20, yPosition);
+            
+            // Results section
+            yPosition += 15;
+            pdf.line(20, yPosition, 190, yPosition);
+            yPosition += 10;
+            
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text('ANÁLISIS DE COSTOS', 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "normal");
+            
+            // Get calculated values
+            const totalIngredientsCost = document.getElementById('totalIngredientsCost').textContent;
+            const addedAmount = document.getElementById('addedAmount').textContent;
+            const totalCosts = document.getElementById('totalCosts').textContent;
+            const unitCost = document.getElementById('unitCost').textContent;
+            const profitPerUnit = document.getElementById('profitPerUnit').textContent;
+            const sellingPrice = document.getElementById('sellingPrice').textContent;
+            const totalMass = document.getElementById('totalMass').textContent;
+            
+            pdf.text(`Total costos ingredientes: ${totalIngredientsCost}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Monto añadido: ${addedAmount}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Total costos: ${totalCosts}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Costo unitario: ${unitCost}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Ganancia por unidad: ${profitPerUnit}`, 20, yPosition);
+            yPosition += 10;
+            
+            // Highlight selling price
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(12);
+            pdf.text(`PRECIO DE VENTA UNITARIO: ${sellingPrice}`, 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(10);
+            pdf.text(`Masa total: ${totalMass} ml/g`, 20, yPosition);
+            
+            // Footer
+            yPosition += 20;
+            pdf.setFontSize(8);
+            pdf.setFont("helvetica", "italic");
+            pdf.text('Generado por Calculadora de Costos de Recetas', 20, yPosition);
+            
+            // Save the PDF
+            pdf.save(`costos-receta-${currentDate}.pdf`);
+        }
+    </script>
+</body>
+</html>
