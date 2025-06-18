@@ -131,170 +131,184 @@ function calculateAll() {
 }
 
 function exportToPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF();
+            
+            // Get current date
+            const currentDate = new Date().toLocaleDateString('es-ES');
+            
+            // Header
+            pdf.setFontSize(20);
+            pdf.setFont("helvetica", "bold");
+            pdf.text('REPORTE DE COSTOS DE RECETA', 20, 25);
+            
+            pdf.setFontSize(12);
+            pdf.setFont("helvetica", "normal");
+            pdf.text(`Fecha: ${currentDate}`, 20, 35);
+            
+            // Line separator
+            pdf.line(20, 45, 190, 45);
+            
+            // Ingredients section
+            let yPosition = 55;
+            pdf.setFontSize(14);
+            pdf.setFont("helvetica", "bold");
+            pdf.text('INGREDIENTES', 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "bold");
+            pdf.text('Ingrediente', 20, yPosition);
+            pdf.text('Cantidad', 80, yPosition);
+            pdf.text('Masa (ml/g)', 110, yPosition);
+            pdf.text('Costo Unit.', 140, yPosition);
+            pdf.text('Costo Total', 170, yPosition);
+            
+            // Draw line under headers
+            pdf.line(20, yPosition + 2, 190, yPosition + 2);
+            
+            yPosition += 8;
+            pdf.setFont("helvetica", "normal");
+            
+            // Get regular ingredients data
+            const rows = document.querySelectorAll('.ingredient-row');
+            rows.forEach(row => {
+                const name = row.children[0].value || 'Sin nombre';
+                const quantity = row.children[1].value || '0';
+                const mass = row.children[2].value || '0';
+                const unitCost = row.children[3].value || '0';
+                const totalCost = row.querySelector('.cost-display').textContent;
+                
+                // Check if we need a new page
+                if (yPosition > 270) {
+                    pdf.addPage();
+                    yPosition = 25;
+                }
+                
+                pdf.text(name.substring(0, 25), 20, yPosition);
+                pdf.text(quantity, 80, yPosition);
+                pdf.text(mass, 110, yPosition);
+                pdf.text(`$${unitCost}`, 140, yPosition);
+                pdf.text(totalCost, 170, yPosition);
+                yPosition += 8;
+            });
 
-    const marginLeft = 40;
-    let y = 40;
-
-    // Título
-    doc.setFontSize(18);
-    doc.setFont(undefined, 'bold');
-    doc.text("REPORTE DE COSTOS DE RECETA", marginLeft, y);
-    y += 25;
-
-    // Fecha actual
-    const fecha = new Date().toLocaleDateString();
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Fecha: ${fecha}`, marginLeft, y);
-    y += 15;
-
-    // Línea separadora
-    doc.setLineWidth(0.5);
-    doc.line(marginLeft, y, 550, y);
-    y += 20;
-
-    // --- INGREDIENTES ---
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(14);
-    doc.text("INGREDIENTES", marginLeft, y);
-    y += 20;
-
-    // Tabla encabezado ingredientes
-    doc.setFontSize(11);
-    const ingredientesHeader = ["Ingrediente", "Cantidad", "Masa (ml/g)", "Costo Unit", "Costo Total"];
-    const colWidths = [180, 60, 70, 70, 70];
-    let x = marginLeft;
-
-    // Encabezados negrita
-    ingredientesHeader.forEach((txt, i) => {
-        doc.text(txt, x + 2, y);
-        x += colWidths[i];
-    });
-    y += 15;
-    doc.setLineWidth(0.3);
-    doc.line(marginLeft, y - 8, marginLeft + colWidths.reduce((a,b) => a + b, 0), y - 8);
-
-    doc.setFont(undefined, 'normal');
-
-    // Datos ingredientes
-    const regularRows = document.querySelectorAll('.ingredient-row');
-    regularRows.forEach(row => {
-        x = marginLeft;
-        const nombre = row.children[0].value || "-";
-        const cantidad = row.children[1].value || "0";
-        const masa = row.children[2].value || "0";
-        const costoUnit = row.children[3].value || "0";
-        const costoTotal = row.querySelector('.cost-display').textContent || "$0.00";
-
-        const values = [nombre, cantidad, masa, `$${parseFloat(costoUnit).toFixed(2)}`, costoTotal];
-        values.forEach((txt, i) => {
-            doc.text(String(txt), x + 2, y);
-            x += colWidths[i];
-        });
-        y += 15;
-    });
-
-    y += 15;
-
-    // --- INGREDIENTES ESPECIALES ---
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(14);
-    doc.text("INGREDIENTES ESPECIALES", marginLeft, y);
-    y += 20;
-
-    // Tabla encabezado ingredientes especiales
-    const specialHeader = ["Ingrediente", "Precio", "Contenido", "Usado", "Masa (ml/g)", "Costo Prop"];
-    const specialColWidths = [140, 50, 60, 50, 70, 70];
-    x = marginLeft;
-
-    specialHeader.forEach((txt, i) => {
-        doc.text(txt, x + 2, y);
-        x += specialColWidths[i];
-    });
-    y += 15;
-    doc.line(marginLeft, y - 8, marginLeft + specialColWidths.reduce((a,b) => a + b, 0), y - 8);
-
-    doc.setFont(undefined, 'normal');
-
-    // Datos especiales
-    const specialRows = document.querySelectorAll('.special-ingredient-row');
-    specialRows.forEach(row => {
-        x = marginLeft;
-        const nombre = row.children[0].value || "-";
-        const precio = row.children[1].value || "0";
-        const contenido = row.children[2].value || "0";
-        const usado = row.children[3].value || "0";
-        const masa = row.children[4].value || "0";
-        const costoProp = row.querySelector('.special-cost-display').textContent || "$0.00";
-
-        const values = [nombre, `$${parseFloat(precio).toFixed(2)}`, contenido, usado, masa, costoProp];
-        values.forEach((txt, i) => {
-            doc.text(String(txt), x + 2, y);
-            x += specialColWidths[i];
-        });
-        y += 15;
-    });
-
-    y += 15;
-
-    // --- CONFIGURACIÓN ---
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(14);
-    doc.text("CONFIGURACIÓN", marginLeft, y);
-    y += 20;
-    doc.setFont(undefined, 'normal');
-    const unidades = document.getElementById('unitsYield').value || "1";
-    const añadido = document.getElementById('addedPercentage').value || "0";
-    const ganancia = document.getElementById('profitPercentage').value || "0";
-    doc.text(`Unidades a producir: ${unidades}`, marginLeft, y);
-    y += 15;
-    doc.text(`Porcentaje añadido: ${añadido}%`, marginLeft, y);
-    y += 15;
-    doc.text(`Porcentaje ganancia: ${ganancia}%`, marginLeft, y);
-    y += 25;
-
-    // --- ANÁLISIS DE COSTOS ---
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(14);
-    doc.text("ANÁLISIS DE COSTOS", marginLeft, y);
-    y += 20;
-    doc.setFont(undefined, 'normal');
-
-    const totalIng = document.getElementById('totalIngredientsCost').textContent || "$0.00";
-    const montoAñadido = document.getElementById('addedAmount').textContent || "$0.00";
-    const totalCostos = document.getElementById('totalCosts').textContent || "$0.00";
-
-    doc.text(`Total ingredientes: ${totalIng}`, marginLeft, y);
-    y += 15;
-    doc.text(`Monto añadido: ${montoAñadido}`, marginLeft, y);
-    y += 15;
-    doc.text(`Total costos: ${totalCostos}`, marginLeft, y);
-    y += 25;
-
-    // --- PRECIO DE VENTA UNITARIO ---
-    doc.setFont(undefined, 'bold');
-    doc.setFontSize(14);
-    doc.text("PRECIO DE VENTA UNITARIO", marginLeft, y);
-    y += 20;
-    doc.setFont(undefined, 'normal');
-
-    const costoUnit = document.getElementById('unitCost').textContent || "$0.00";
-    const gananciaUnidad = document.getElementById('profitPerUnit').textContent || "$0.00";
-    const precioVenta = document.getElementById('sellingPrice').textContent || "$0.00";
-
-    doc.text(`Costo unitario: ${costoUnit}`, marginLeft, y);
-    y += 15;
-    doc.text(`Ganancia por unidad: ${gananciaUnidad}`, marginLeft, y);
-    y += 15;
-    doc.text(`Precio de venta: ${precioVenta}`, marginLeft, y);
-    y += 25;
-
-    // Masa total
-    const masaTotal = document.getElementById('totalMass').textContent || "0";
-    doc.text(`Masa total: ${masaTotal} ml/g`, marginLeft, y);
-
-    // Guardar PDF
-    doc.save("reporte-costos.pdf");
-}
+            // Special ingredients section
+            const specialRows = document.querySelectorAll('.special-ingredient-row');
+            if (specialRows.length > 0) {
+                yPosition += 10;
+                pdf.setFont("helvetica", "bold");
+                pdf.setFontSize(14);
+                pdf.text('INGREDIENTES ESPECIALES', 20, yPosition);
+                
+                yPosition += 10;
+                pdf.setFontSize(10);
+                pdf.text('Ingrediente', 20, yPosition);
+                pdf.text('Precio Paq.', 80, yPosition);
+                pdf.text('Contenido', 110, yPosition);
+                pdf.text('Usado', 140, yPosition);
+                pdf.text('Costo Total', 170, yPosition);
+                
+                // Draw line under headers
+                pdf.line(20, yPosition + 2, 190, yPosition + 2);
+                
+                yPosition += 8;
+                pdf.setFont("helvetica", "normal");
+                
+                specialRows.forEach(row => {
+                    const name = row.children[0].value || 'Sin nombre';
+                    const packagePrice = row.children[1].value || '0';
+                    const packageContent = row.children[2].value || '0';
+                    const usedQuantity = row.children[3].value || '0';
+                    const totalCost = row.querySelector('.special-cost-display').textContent;
+                    
+                    // Check if we need a new page
+                    if (yPosition > 270) {
+                        pdf.addPage();
+                        yPosition = 25;
+                    }
+                    
+                    pdf.text(name.substring(0, 25), 20, yPosition);
+                    pdf.text(`$${packagePrice}`, 80, yPosition);
+                    pdf.text(packageContent, 110, yPosition);
+                    pdf.text(usedQuantity, 140, yPosition);
+                    pdf.text(totalCost, 170, yPosition);
+                    yPosition += 8;
+                });
+            }
+            
+            // Configuration section
+            yPosition += 10;
+            pdf.line(20, yPosition, 190, yPosition);
+            yPosition += 10;
+            
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text('CONFIGURACIÓN', 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "normal");
+            
+            const units = document.getElementById('unitsYield').value;
+            const addedPercent = document.getElementById('addedPercentage').value;
+            const profitPercent = document.getElementById('profitPercentage').value;
+            
+            pdf.text(`Unidades que rinde: ${units}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Porcentaje añadido: ${addedPercent}%`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Beneficio esperado: ${profitPercent}%`, 20, yPosition);
+            
+            // Results section
+            yPosition += 15;
+            pdf.line(20, yPosition, 190, yPosition);
+            yPosition += 10;
+            
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text('ANÁLISIS DE COSTOS', 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFontSize(10);
+            pdf.setFont("helvetica", "normal");
+            
+            // Get calculated values
+            const totalIngredientsCost = document.getElementById('totalIngredientsCost').textContent;
+            const addedAmount = document.getElementById('addedAmount').textContent;
+            const totalCosts = document.getElementById('totalCosts').textContent;
+            const unitCost = document.getElementById('unitCost').textContent;
+            const profitPerUnit = document.getElementById('profitPerUnit').textContent;
+            const sellingPrice = document.getElementById('sellingPrice').textContent;
+            const totalMass = document.getElementById('totalMass').textContent;
+            
+            pdf.text(`Total costos ingredientes: ${totalIngredientsCost}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Monto añadido: ${addedAmount}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Total costos: ${totalCosts}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Costo unitario: ${unitCost}`, 20, yPosition);
+            yPosition += 6;
+            pdf.text(`Ganancia por unidad: ${profitPerUnit}`, 20, yPosition);
+            yPosition += 10;
+            
+            // Highlight selling price
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(12);
+            pdf.text(`PRECIO DE VENTA UNITARIO: ${sellingPrice}`, 20, yPosition);
+            
+            yPosition += 10;
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(10);
+            pdf.text(`Masa total: ${totalMass} ml/g`, 20, yPosition);
+            
+            // Footer
+            yPosition += 20;
+            pdf.setFontSize(8);
+            pdf.setFont("helvetica", "italic");
+            pdf.text('Generado por Calculadora de Costos de Recetas', 20, yPosition);
+            
+            // Save the PDF
+            pdf.save(`costos-receta-${currentDate}.pdf`);
+        }
