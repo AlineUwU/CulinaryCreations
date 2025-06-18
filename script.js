@@ -133,7 +133,6 @@ function calculateAll() {
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
     let y = 10;
 
     doc.setFontSize(16);
@@ -141,25 +140,57 @@ function exportToPDF() {
     y += 10;
 
     doc.setFontSize(12);
-    doc.text("Costos Totales:", 20, y);
-    y += 8;
-    doc.text(`- Ingredientes: ${document.getElementById('totalIngredientsCost').textContent}`, 20, y);
+    doc.text("Ingredientes Regulares:", 20, y);
     y += 6;
-    doc.text(`- Añadido (%): ${document.getElementById('addedAmount').textContent}`, 20, y);
-    y += 6;
-    doc.text(`- Total: ${document.getElementById('totalCosts').textContent}`, 20, y);
-    y += 10;
 
-    doc.text("Cálculos Unitarios:", 20, y);
-    y += 8;
-    doc.text(`- Costo Unitario: ${document.getElementById('unitCost').textContent}`, 20, y);
-    y += 6;
-    doc.text(`- Ganancia x Unidad: ${document.getElementById('profitPerUnit').textContent}`, 20, y);
-    y += 6;
-    doc.text(`- Precio Venta: ${document.getElementById('sellingPrice').textContent}`, 20, y);
-    y += 10;
+    const regularRows = document.querySelectorAll('.ingredient-row');
+    regularRows.forEach((row, index) => {
+        const nombre = row.children[0].value || '';
+        const cantidad = row.children[1].value || '0';
+        const masa = row.children[2].value || '0';
+        const costoUnitario = row.children[3].value || '0';
+        const costoTotal = row.querySelector('.cost-display')?.textContent || '$0.00';
 
-    doc.text(`Total de masa (ml/g): ${document.getElementById('totalMass').textContent}`, 20, y);
+        doc.text(`${index + 1}. ${nombre} - ${cantidad} x $${costoUnitario} = ${costoTotal}`, 20, y);
+        y += 6;
+    });
+
+    y += 4;
+    doc.text("Ingredientes Especiales:", 20, y);
+    y += 6;
+
+    const specialRows = document.querySelectorAll('.special-ingredient-row');
+    specialRows.forEach((row, index) => {
+        const nombre = row.children[0].value || '';
+        const precioPaq = row.children[1].value || '0';
+        const contenido = row.children[2].value || '0';
+        const usado = row.children[3].value || '0';
+        const proporcional = row.querySelector('.special-cost-display')?.textContent || '$0.00';
+
+        doc.text(`${index + 1}. ${nombre} - ${usado}g de ${contenido}g = ${proporcional}`, 20, y);
+        y += 6;
+    });
+
+    y += 6;
+    doc.text("Resumen de Costos:", 20, y);
+    y += 6;
+    doc.text(`Total ingredientes: ${document.getElementById('totalIngredientsCost').textContent}`, 20, y);
+    y += 6;
+    doc.text(`Monto añadido: ${document.getElementById('addedAmount').textContent}`, 20, y);
+    y += 6;
+    doc.text(`Total costos: ${document.getElementById('totalCosts').textContent}`, 20, y);
+    y += 6;
+
+    doc.text("Precios y Ganancia:", 20, y);
+    y += 6;
+    doc.text(`Costo unitario: ${document.getElementById('unitCost').textContent}`, 20, y);
+    y += 6;
+    doc.text(`Ganancia por unidad: ${document.getElementById('profitPerUnit').textContent}`, 20, y);
+    y += 6;
+    doc.text(`Precio de venta unitario: ${document.getElementById('sellingPrice').textContent}`, 20, y);
+    y += 6;
+
+    doc.text(`Total masa: ${document.getElementById('totalMass').textContent} ml/g`, 20, y);
 
     doc.save('reporte.pdf');
 }
