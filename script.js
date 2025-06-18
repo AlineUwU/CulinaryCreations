@@ -163,4 +163,3 @@ function exportToPDF() {
 
     doc.save('reporte.pdf');
 }
-
