@@ -312,3 +312,9 @@ function exportToPDF() {
             // Save the PDF
             pdf.save(`costos-receta-${currentDate}.pdf`);
         }
+
+function toggleDarkMode() {
+    document.documentElement.classList.toggle('dark');
+}
+
+window.toggleDarkMode = toggleDarkMode;
