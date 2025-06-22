@@ -1,4 +1,4 @@
-/* Animación de entrada suave */
+/* 🍓 Animación de entrada suave */
 .fade-in {
     animation: fadeIn 0.5s ease-in-out;
 }
@@ -8,42 +8,83 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Estilo para hover de filas de ingredientes */
+/* 🍰 Hover en filas de ingredientes */
 .ingredient-row {
     transition: background-color 0.3s ease;
 }
 .ingredient-row:hover {
-    background-color: rgba(93, 92, 222, 0.05); /* Tailwind primary claro */
+    background-color: rgba(230, 213, 255, 0.3); /* lavanda claro pastel */
 }
 .dark .ingredient-row:hover {
-    background-color: rgba(93, 92, 222, 0.1);
+    background-color: rgba(230, 213, 255, 0.4);
 }
 
-/* Inputs personalizados si deseas aplicar un estilo unificado */
+/* 🧁 Inputs con borde pastel accesible */
 input[type="number"],
 input[type="text"] {
     transition: border-color 0.2s ease;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    border: 2px solid #E4E4E7;
 }
 input[type="number"]:focus,
 input[type="text"]:focus {
-    border-color: #5D5CDE; /* primary */
+    border-color: #A8D0E6; /* azul pastel */
     outline: none;
 }
 
-/* Botones destacados */
+.dark input[type="number"],
+.dark input[type="text"] {
+    background-color: #3B3B4A;
+    color: #F5F5F5;
+    border-color: #A8D0E6;
+}
+
+/* 🍬 Botones con efecto kawaii pastel */
 button {
     transition: background-color 0.2s ease, transform 0.1s ease;
+    background-color: #A8D0E6;
+    color: #2E2E2E;
+    border-radius: 9999px;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    box-shadow: 0 2px 4px rgba(168, 208, 230, 0.3);
+    font-family: 'Quicksand', sans-serif;
+}
+button:hover {
+    background-color: #91BED8;
 }
 button:active {
-    transform: scale(0.98);
+    transform: scale(0.97);
 }
 
-/* Modo claro y oscuro */
+.dark button {
+    background-color: #91BED8;
+    color: #1E1E1E;
+    box-shadow: 0 2px 4px rgba(168, 208, 230, 0.3);
+}
+
+.dark button:hover {
+    background-color: #A8D0E6;
+}
+
+/* 🎀 Transición cuerpo general */
 body {
     transition: background-color 0.3s ease, color 0.3s ease;
+    background-color: #FFF5F7; /* rosita pastel */
+    color: #2E2E2E;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
-/* Scroll personalizado */
+.dark body {
+    background-color: #2E2E3A;
+    color: #F5F5F5;
+}
+
+/* 🪄 Scroll pastel suave */
 ::-webkit-scrollbar {
     width: 8px;
 }
@@ -51,9 +92,9 @@ body {
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background-color: rgba(93, 92, 222, 0.4); 
+    background-color: #DCD6F7; 
     border-radius: 4px;
 }
 .dark ::-webkit-scrollbar-thumb {
-    background-color: rgba(93, 92, 222, 0.6);
+    background-color: #C1B3E7;
 }
