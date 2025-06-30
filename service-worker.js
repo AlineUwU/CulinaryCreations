@@ -1,5 +1,5 @@
 const CACHE_NAME = 'costos-receta-v1';
-const urlsToCache = [
+const FILES_TO_CACHE = [
   '/CulinaryCreations/',
   '/CulinaryCreations/index.html',
   '/CulinaryCreations/styles.css',
