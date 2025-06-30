@@ -195,15 +195,15 @@
         </div>
     </div>
 
-     <script src="/CulinaryCreations/script.js" defer></script>
+     <script src="script.js" defer></script>
 <script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/CulinaryCreations/service-worker.js')
-                .then(reg => console.log('✅ Service Worker registrado:', reg.scope))
-                .catch(err => console.error('❌ Error registrando el Service Worker:', err));
-        });
-    }
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✅ Service Worker registrado:', reg.scope))
+        .catch(err => console.error('❌ Error registrando el Service Worker:', err));
+    });
+  }
 </script>
 <!-- Sección de agradecimiento y Ko-fi -->
 <footer style="text-align: center; margin-top: 60px; padding: 20px; background-color: #2E2E2E;">
