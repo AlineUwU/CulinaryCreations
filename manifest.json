@@ -1,7 +1,7 @@
 {
   "name": "Calculadora de Costos de Recetas",
   "short_name": "Costos Recetas",
-  "start_url": "/CulinaryCreations/index.html"
+  "start_url": "/CulinaryCreations/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#5D5CDE",
