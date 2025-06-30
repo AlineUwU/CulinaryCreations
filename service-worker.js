@@ -4,6 +4,8 @@ const urlsToCache = [
   'CulinaryCreations/index.html',
   'CulinaryCreations/styles.css',
   'CulinaryCreations/script.js',
+  'CulinaryCreations/desktop-preview.png',
+  'CulinaryCreations/mobile-preview.png',
   'CulinaryCreations/icon-192.png',
   'CulinaryCreations/icon-512.png'
 ];
