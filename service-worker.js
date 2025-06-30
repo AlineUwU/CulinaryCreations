@@ -5,6 +5,7 @@ const FILES_TO_CACHE = [
   '/CulinaryCreations/styles.css',
   '/CulinaryCreations/script.js',
   '/CulinaryCreations/desktop-preview.png',
+  '/CulinaryCreations/favicon.ico',
   '/CulinaryCreations/mobile-preview.png',
   '/CulinaryCreations/icon-192.png',
   '/CulinaryCreations/icon-512.png'
