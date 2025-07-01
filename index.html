@@ -197,12 +197,12 @@
     </div>
 
      <script src="script.js" defer></script>
+<script src="script.js" defer></script>
 <script>
   if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/CulinaryCreations/service-worker.js')
-    .then(reg => console.log('SW registrado!', reg.scope))
-    .catch(err => console.error('SW no se pudo registrar:', err));
-    });
+    navigator.serviceWorker.register('/CulinaryCreations/service-worker.js')
+      .then(reg => console.log('SW registrado!', reg.scope))
+      .catch(err => console.error('SW no se pudo registrar:', err));
   }
 </script>
 <!-- Sección de agradecimiento y Ko-fi -->
