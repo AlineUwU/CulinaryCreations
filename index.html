@@ -186,6 +186,18 @@
                         <div class="text-sm text-gray-600 dark:text-gray-400">ml/g totales</div>
                     </div>
                 </div>
+                <div class="text-center mb-6 flex flex-wrap justify-center gap-4">
+    <!-- Botón IMPORTAR (Cargar) -->
+    <label class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg cursor-pointer transition shadow-md flex items-center gap-2">
+        📂 Cargar Excel
+        <input type="file" id="importExcelInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(this)">
+    </label>
+
+    <!-- Botón EXPORTAR (Guardar) -->
+    <button onclick="exportToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition shadow-md flex items-center gap-2">
+        💾 Guardar Excel
+    </button>
+</div>
 
                 <!-- Export PDF Button -->
                 <div class="text-center">
