@@ -1,230 +1,467 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Costos de Recetas</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Culinary Creations - Calculadora de Costos</title>
+    <!-- Librerías Externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
-                        primary: '#5D5CDE'
+                        primary: '#5D5CDE',
+                        pastelBlue: '#A8D0E6',
+                        pastelPink: '#FFF5F7',
+                    },
+                    gridTemplateColumns: {
+                        '16': 'repeat(16, minmax(0, 1fr))',
                     }
                 }
             }
         }
     </script>
-     <link rel="icon" href="/CulinaryCreations/favicon.ico" type="image/x-icon">
-     <link rel="stylesheet" href="/CulinaryCreations/styles.css">
-     <link rel="manifest" href="/CulinaryCreations/manifest.json">
+
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .ingredient-row, .special-ingredient-row {
+            transition: all 0.2s ease;
+        }
+        .ingredient-row:hover {
+            transform: translateX(4px);
+        }
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.2);
+        }
+        /* Estilos personalizados para inputs */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
 </head>
-<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-    <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-50 bg-[#A8D0E6] hover:bg-[#91BED8] text-[#2E2E2E] font-semibold rounded-full px-4 py-2 shadow-md text-sm transition">
-  🌙/☀️
+<body class="bg-pastelPink dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen pb-10">
+
+    <!-- Botón Modo Oscuro -->
+    <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-50 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:scale-110 transition active:scale-95">
+        <span class="dark:hidden">🌙</span>
+        <span class="hidden dark:inline">☀️</span>
     </button>
+
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-primary mb-2">Calculadora de Costos de Recetas</h1>
-            <p class="text-gray-600 dark:text-gray-400">Calcula costos, márgenes y precios de venta de manera profesional</p>
-        </div>
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-primary mb-2">Culinary Creations 💙</h1>
+            <p class="text-gray-600 dark:text-gray-400">Tu asistente profesional para el costeo de recetas</p>
+            <div class="mt-4 max-w-md mx-auto">
+                <input type="text" id="recipeName" placeholder="Nombre de la Receta" class="w-full text-center text-xl font-semibold bg-transparent border-b-2 border-primary focus:border-primary px-2 py-1">
+            </div>
+        </header>
 
         <div class="grid lg:grid-cols-3 gap-8">
-            <!-- Ingredientes Section -->
-            <div class="lg:col-span-2 space-y-6">
+            <!-- Sección de Ingredientes -->
+            <div class="lg:col-span-2 space-y-8">
+                
                 <!-- Ingredientes Regulares -->
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                <section class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-xl font-semibold">Ingredientes Regulares</h2>
-                        <button id="addIngredientBtn" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors">
-                            + Agregar Ingrediente
+                        <h2 class="text-xl font-bold flex items-center gap-2">
+                            <span>🧂</span> Ingredientes Regulares
+                        </h2>
+                        <button onclick="addIngredientRow()" class="bg-primary text-white px-4 py-2 rounded-xl hover:opacity-90 transition active:scale-95 text-sm font-semibold">
+                            + Agregar
                         </button>
                     </div>
 
-                    <!-- Ingredientes Header -->
-                    <div class="grid grid-cols-12 gap-2 mb-4 text-sm font-medium text-gray-600 dark:text-gray-400 border-b pb-2">
+                    <!-- Header Tabla (Desktop) -->
+                    <div class="hidden md:grid grid-cols-12 gap-4 mb-4 text-xs font-bold text-gray-400 uppercase tracking-wider px-2">
                         <div class="col-span-4">Ingrediente</div>
-                        <div class="col-span-2">Cantidad</div>
-                        <div class="col-span-2">Masa (ml/g)</div>
-                        <div class="col-span-2">Costo Unit.</div>
-                        <div class="col-span-1">Costo Total</div>
+                        <div class="col-span-2 text-center">Cantidad</div>
+                        <div class="col-span-2 text-center">Masa (g/ml)</div>
+                        <div class="col-span-2 text-center">Costo Unit.</div>
+                        <div class="col-span-1 text-right">Total</div>
                         <div class="col-span-1"></div>
                     </div>
 
-                    <!-- Ingredientes List -->
-                    <div id="ingredientsList" class="space-y-2">
-                        <!-- Ingredientes iniciales -->
-                        <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="P[...]">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="5" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="1000" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="12" min="0" step="0.01">
-                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$60.00</span>
-                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
-                        </div>
-                        <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="L[...]">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="120" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="20" min="0" step="0.01">
-                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$20.00</span>
-                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
-                        </div>
-                        <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="C[...]">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="500" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="50" min="0" step="0.01">
-                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$50.00</span>
-                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
-                        </div>
+                    <div id="ingredientsList" class="space-y-3">
+                        <!-- Las filas se generan aquí -->
                     </div>
-                </div>
+                </section>
 
                 <!-- Ingredientes Especiales -->
-                <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-6">
+                <section class="bg-orange-50/50 dark:bg-orange-900/10 rounded-2xl p-6 shadow-sm border border-orange-100 dark:border-orange-900/30">
                     <div class="flex justify-between items-center mb-6">
                         <div>
-                            <h2 class="text-xl font-semibold text-orange-800 dark:text-orange-200">Ingredientes Especiales</h2>
-                            <p class="text-sm text-orange-600 dark:text-orange-300">Para ingredientes a granel (ej: $80 por 250g, usas 7g)</p>
+                            <h2 class="text-xl font-bold text-orange-800 dark:text-orange-200 flex items-center gap-2">
+                                <span>✨</span> Ingredientes Especiales
+                            </h2>
+                            <p class="text-xs text-orange-600 dark:text-orange-400">Para granel: $Precio por Contenido, usas Cantidad.</p>
                         </div>
-                        <button id="addSpecialIngredientBtn" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">
-                            + Agregar Especial
+                        <button onclick="addSpecialIngredientRow()" class="bg-orange-600 text-white px-4 py-2 rounded-xl hover:opacity-90 transition active:scale-95 text-sm font-semibold">
+                            + Especial
                         </button>
                     </div>
 
-                    <!-- Ingredientes Especiales Header -->
-                    <div class="grid grid-cols-16 gap-2 mb-4 text-sm font-medium text-orange-700 dark:text-orange-300 border-b border-orange-200 dark:border-orange-700 pb-2">
-                        <div class="col-span-4">Ingrediente</div>
-                        <div class="col-span-2">Precio Paquete</div>
-                        <div class="col-span-2">Contenido Paq.</div>
-                        <div class="col-span-2">Cantidad Usada (se sumara a los costos)</div>
-                        <div class="col-span-2">Masa (ml/g) (se sumara al resumen de masa)</div>
-                        <div class="col-span-2">Costo Proporcional</div>
-                        <div class="col-span-1">Costo Total</div>
-                        <div class="col-span-1"></div>
+                    <div id="specialIngredientsList" class="space-y-4">
+                        <!-- Las filas especiales se generan aquí -->
                     </div>
-
-                    <!-- Ingredientes Especiales List -->
-                    <div id="specialIngredientsList" class="space-y-2">
-                        <!-- Ejemplo inicial: Grenetina -->
-                        <div class="special-ingredient-row grid grid-cols-16 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="Nombre del [...]">
-                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="$0.00" value="80" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="250" value="250" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="7" value="7" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="Masa" value="7" min="0" step="0.01">
-                            <span class="col-span-2 text-sm font-medium text-orange-700 dark:text-orange-300 proportional-cost">$2.24</span>
-                            <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 special-cost-display">$2.24</span>
-                            <button class="col-span-1 text-red-500 hover:text-red-700 remove-special-ingredient p-1">✕</button>
-                        </div>
-                    </div>
-                </div>
+                </section>
             </div>
 
-            <!-- Calculations Section -->
+            <!-- Panel de Resultados -->
             <div class="space-y-6">
                 <!-- Configuración -->
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                    <h3 class="text-lg font-semibold mb-4">Configuración</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">⚙️ Configuración</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2">Unidades que rinde</label>
-                            <input type="number" id="unitsYield" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="40" min="1">
+                            <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Unidades que rinde</label>
+                            <input type="number" id="unitsYield" class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-700 border-none text-lg font-bold" value="12" min="1">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">% Añadido</label>
-                            <input type="number" id="addedPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="30" min="0" step="0.01">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-2">% Beneficio esperado</label>
-                            <input type="number" id="profitPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="150" min="0" step="0.01">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Resultados -->
-                <div class="bg-primary/10 dark:bg-primary/20 rounded-xl p-6">
-                    <h3 class="text-lg font-semibold mb-4">Análisis de Costos</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between">
-                            <span class="text-sm">Total costos ingredientes:</span>
-                            <span class="font-bold" id="totalIngredientsCost">$130.00</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm">Monto añadido:</span>
-                            <span class="font-bold" id="addedAmount">$39.00</span>
-                        </div>
-                        <div class="flex justify-between border-t pt-2">
-                            <span class="text-sm font-medium">Total costos:</span>
-                            <span class="font-bold" id="totalCosts">$169.00</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm">Costo unitario:</span>
-                            <span class="font-bold" id="unitCost">$4.23</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm">Ganancia por unidad:</span>
-                            <span class="font-bold text-green-600" id="profitPerUnit">$6.34</span>
-                        </div>
-                        <div class="flex justify-between border-t pt-2">
-                            <span class="text-sm font-medium">Precio de venta unitario:</span>
-                            <span class="font-bold text-lg text-primary" id="sellingPrice">$10.57</span>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">% Margen Error</label>
+                                <input type="number" id="addedPercentage" class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-700 border-none font-bold" value="10" min="0">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">% Beneficio</label>
+                                <input type="number" id="profitPercentage" class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-700 border-none font-bold" value="100" min="0">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Resumen de masa -->
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-                    <h3 class="text-lg font-semibold mb-4">Resumen de Masa</h3>
-                    <div class="text-center">
-                        <div class="text-2xl font-bold text-primary" id="totalMass">1620</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">ml/g totales</div>
+                <!-- Análisis Financiero -->
+                <div class="bg-primary text-white rounded-2xl p-6 shadow-xl shadow-primary/20">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">💰 Análisis de Costos</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between opacity-80">
+                            <span>Subtotal Ingredientes:</span>
+                            <span id="totalIngredientsCost" class="font-bold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between opacity-80">
+                            <span>Margen de Seguridad:</span>
+                            <span id="addedAmount" class="font-bold">$0.00</span>
+                        </div>
+                        <div class="pt-3 border-t border-white/20 flex justify-between text-base">
+                            <span class="font-semibold">Costo Total Receta:</span>
+                            <span id="totalCosts" class="font-bold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between opacity-80">
+                            <span>Costo por Unidad:</span>
+                            <span id="unitCost" class="font-bold">$0.00</span>
+                        </div>
+                        <div class="flex justify-between text-green-300">
+                            <span>Ganancia por Unidad:</span>
+                            <span id="profitPerUnit" class="font-bold">$0.00</span>
+                        </div>
+                        <div class="pt-4 mt-2 border-t border-white/20 text-center">
+                            <div class="text-xs uppercase font-bold opacity-70 mb-1">Precio Sugerido Venta</div>
+                            <div id="sellingPrice" class="text-4xl font-black">$0.00</div>
+                        </div>
                     </div>
                 </div>
-                <div class="text-center mb-6 flex flex-wrap justify-center gap-4">
-    <!-- Botón IMPORTAR (Cargar) -->
-    <label class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg cursor-pointer transition shadow-md flex items-center gap-2">
-        📂 Cargar Excel
-        <input type="file" id="importExcelInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(this)">
-    </label>
 
-    <!-- Botón EXPORTAR (Guardar) -->
-    <button onclick="exportToExcel()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition shadow-md flex items-center gap-2">
-        💾 Guardar Excel
-    </button>
-</div>
+                <!-- Resumen de Masa -->
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
+                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-2">Masa Total Estimada</h3>
+                    <div class="flex justify-center items-baseline gap-2">
+                        <span id="totalMass" class="text-3xl font-black text-primary">0</span>
+                        <span class="text-gray-500 font-bold">g/ml</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400 mt-2">Suma de todos los pesos de ingredientes</p>
+                </div>
 
-                <!-- Export PDF Button -->
-                <div class="text-center">
-                    <button id="exportPdfBtn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-lg">
-                        📄 Exportar a PDF
+                <!-- Acciones -->
+                <div class="grid grid-cols-1 gap-3">
+                    <button onclick="exportToPDF()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2">
+                        <span>📄</span> Exportar PDF
                     </button>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="exportToExcel()" class="bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition text-sm">
+                            💾 Guardar
+                        </button>
+                        <label class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-bold py-3 rounded-xl hover:opacity-80 transition text-sm text-center cursor-pointer">
+                            📂 Cargar
+                            <input type="file" class="hidden" accept=".xlsx" onchange="importFromExcel(this)">
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-     <script src="script.js" defer></script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./service-worker.js')
-      .then(reg => console.log('✅ SW registrado:', reg.scope))
-      .catch(err => console.error('❌ SW no se pudo registrar:', err));
-  }
-</script>
-<!-- Sección de agradecimiento y Ko-fi -->
-<footer style="text-align: center; margin-top: 60px; padding: 20px; background-color: #2E2E2E;">
-  <h2>¡Gracias por visitar Culinary Creations!</h2>
-  <p>Si te gustó y te sirvió la pagina, rola pa una Coca 😜😜🥤</p>
-  <a href="https://ko-fi.com/alineuwu" target="_blank">
-    <img src="https://storage.ko-fi.com/cdn/kofi5.png" alt="Buy Me a Coffee at ko-fi.com" style="height: 45px;">
-  </a>
-</footer>
+    <footer class="text-center mt-12 py-8 bg-gray-100 dark:bg-gray-800">
+        <p class="text-sm font-semibold mb-4">Creado con cariño por Culinary Creations 💙</p>
+        <a href="https://ko-fi.com/alineuwu" target="_blank" class="inline-block transform hover:scale-105 transition">
+            <img src="https://storage.ko-fi.com/cdn/kofi5.png" alt="Ko-fi" class="h-10">
+        </a>
+    </footer>
 
+    <script>
+        // --- Estado Global ---
+        const state = {
+            ingredients: [],
+            specialIngredients: []
+        };
+
+        // --- Inicialización ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Datos por defecto
+            addIngredientRow('Harina de Trigo', 1, 1000, 15);
+            addIngredientRow('Leche Entera', 0.5, 500, 22);
+            addSpecialIngredientRow('Grenetina', 80, 250, 7, 7);
+
+            // Listeners globales
+            ['unitsYield', 'addedPercentage', 'profitPercentage'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calculateAll);
+            });
+
+            // Delegación de eventos para eliminar (Solución definitiva para la "X")
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.remove-btn');
+                if (btn) {
+                    const row = btn.closest('.ingredient-row, .special-ingredient-row');
+                    if (row) {
+                        row.classList.add('opacity-0', 'scale-95');
+                        setTimeout(() => {
+                            row.remove();
+                            calculateAll();
+                        }, 200);
+                    }
+                }
+            });
+
+            calculateAll();
+        });
+
+        // --- Generación de Filas ---
+        function addIngredientRow(name = '', qty = '', mass = '', cost = '') {
+            const list = document.getElementById('ingredientsList');
+            const row = document.createElement('div');
+            row.className = 'ingredient-row grid grid-cols-1 md:grid-cols-12 gap-2 md:gap-4 items-center bg-gray-50 dark:bg-gray-700/50 p-3 rounded-xl border border-transparent hover:border-primary/20';
+            
+            row.innerHTML = `
+                <div class="col-span-1 md:col-span-4">
+                    <input type="text" placeholder="Nombre" value="${name}" class="w-full bg-transparent border-none font-semibold text-sm">
+                </div>
+                <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+                    <span class="md:hidden text-[10px] font-bold text-gray-400">CANT:</span>
+                    <input type="number" placeholder="0" value="${qty}" class="qty-input w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none text-center font-bold">
+                </div>
+                <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+                    <span class="md:hidden text-[10px] font-bold text-gray-400">MASA:</span>
+                    <input type="number" placeholder="0" value="${mass}" class="mass-input w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none text-center font-bold">
+                </div>
+                <div class="col-span-1 md:col-span-2 flex items-center gap-2">
+                    <span class="md:hidden text-[10px] font-bold text-gray-400">COSTO:</span>
+                    <input type="number" placeholder="0" value="${cost}" class="cost-input w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none text-center font-bold">
+                </div>
+                <div class="col-span-1 md:col-span-1 text-right font-black text-primary row-total">$0.00</div>
+                <div class="col-span-1 text-right">
+                    <button class="remove-btn text-red-400 hover:text-red-600 transition p-1">✕</button>
+                </div>
+            `;
+            
+            list.appendChild(row);
+            row.querySelectorAll('input').forEach(i => i.addEventListener('input', calculateAll));
+            calculateAll();
+        }
+
+        function addSpecialIngredientRow(name = '', pkgPrice = '', pkgCont = '', used = '', mass = '') {
+            const list = document.getElementById('specialIngredientsList');
+            const row = document.createElement('div');
+            row.className = 'special-ingredient-row grid grid-cols-1 md:grid-cols-16 gap-3 items-center bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-orange-100 dark:border-orange-900/30';
+            
+            row.innerHTML = `
+                <div class="md:col-span-4">
+                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Ingrediente</label>
+                    <input type="text" placeholder="Ej: Vainilla" value="${name}" class="w-full bg-transparent border-none font-bold">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Precio Paq.</label>
+                    <input type="number" placeholder="0" value="${pkgPrice}" class="spec-price w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Contenido</label>
+                    <input type="number" placeholder="0" value="${pkgCont}" class="spec-cont w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Usado</label>
+                    <input type="number" placeholder="0" value="${used}" class="spec-used w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Masa (g)</label>
+                    <input type="number" placeholder="0" value="${mass}" class="spec-mass w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
+                </div>
+                <div class="md:col-span-3 text-right">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase">Costo Prop.</div>
+                    <div class="font-black text-orange-600 spec-total">$0.00</div>
+                </div>
+                <div class="md:col-span-1 text-right">
+                    <button class="remove-btn text-red-400 hover:text-red-600 transition p-1">✕</button>
+                </div>
+            `;
+            
+            list.appendChild(row);
+            row.querySelectorAll('input').forEach(i => i.addEventListener('input', calculateAll));
+            calculateAll();
+        }
+
+        // --- Cálculos ---
+        function calculateAll() {
+            let totalIngredientsCost = 0;
+            let totalMass = 0;
+
+            // Ingredientes Regulares
+            document.querySelectorAll('.ingredient-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                const cost = parseFloat(row.querySelector('.cost-input').value) || 0;
+                const mass = parseFloat(row.querySelector('.mass-input').value) || 0;
+                
+                const total = qty * cost;
+                row.querySelector('.row-total').textContent = `$${total.toFixed(2)}`;
+                
+                totalIngredientsCost += total;
+                totalMass += mass;
+            });
+
+            // Ingredientes Especiales
+            document.querySelectorAll('.special-ingredient-row').forEach(row => {
+                const p = parseFloat(row.querySelector('.spec-price').value) || 0;
+                const c = parseFloat(row.querySelector('.spec-cont').value) || 1;
+                const u = parseFloat(row.querySelector('.spec-used').value) || 0;
+                const m = parseFloat(row.querySelector('.spec-mass').value) || 0;
+
+                const total = (p / c) * u;
+                row.querySelector('.spec-total').textContent = `$${total.toFixed(2)}`;
+                
+                totalIngredientsCost += total;
+                totalMass += m;
+            });
+
+            // Resultados Finales
+            const units = parseFloat(document.getElementById('unitsYield').value) || 1;
+            const margin = parseFloat(document.getElementById('addedPercentage').value) || 0;
+            const profit = parseFloat(document.getElementById('profitPercentage').value) || 0;
+
+            const marginAmount = totalIngredientsCost * (margin / 100);
+            const totalCosts = totalIngredientsCost + marginAmount;
+            const unitCost = totalCosts / units;
+            const sellingPrice = unitCost * (1 + (profit / 100));
+            const profitPerUnit = sellingPrice - unitCost;
+
+            // Actualizar UI
+            document.getElementById('totalIngredientsCost').textContent = `$${totalIngredientsCost.toFixed(2)}`;
+            document.getElementById('addedAmount').textContent = `$${marginAmount.toFixed(2)}`;
+            document.getElementById('totalCosts').textContent = `$${totalCosts.toFixed(2)}`;
+            document.getElementById('unitCost').textContent = `$${unitCost.toFixed(2)}`;
+            document.getElementById('profitPerUnit').textContent = `$${profitPerUnit.toFixed(2)}`;
+            document.getElementById('sellingPrice').textContent = `$${sellingPrice.toFixed(2)}`;
+            document.getElementById('totalMass').textContent = Math.round(totalMass);
+        }
+
+        // --- Utilidades ---
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        function exportToExcel() {
+            const recipeName = document.getElementById('recipeName').value || 'Receta';
+            const wb = XLSX.utils.book_new();
+            
+            // Recopilar datos
+            const data = [
+                ["Culinary Creations - Reporte de Costos"],
+                ["Receta", recipeName],
+                ["Fecha", new Date().toLocaleDateString()],
+                [],
+                ["TIPO", "NOMBRE", "CANT/USADO", "MASA", "COSTO UNIT/PAQ", "SUBTOTAL"]
+            ];
+
+            document.querySelectorAll('.ingredient-row').forEach(r => {
+                const inputs = r.querySelectorAll('input');
+                data.push(["Regular", inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, r.querySelector('.row-total').textContent]);
+            });
+
+            document.querySelectorAll('.special-ingredient-row').forEach(r => {
+                const inputs = r.querySelectorAll('input');
+                data.push(["Especial", inputs[0].value, inputs[3].value, inputs[4].value, inputs[1].value, r.querySelector('.spec-total').textContent]);
+            });
+
+            data.push([], ["RESUMEN FINAL"]);
+            data.push(["Costo Total", document.getElementById('totalCosts').textContent]);
+            data.push(["Precio Venta Sugerido", document.getElementById('sellingPrice').textContent]);
+
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, "Costos");
+            XLSX.writeFile(wb, `${recipeName.replace(/\s/g, '_')}_Costos.xlsx`);
+        }
+
+        function importFromExcel(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+
+                // Limpiar actuales
+                document.getElementById('ingredientsList').innerHTML = '';
+                document.getElementById('specialIngredientsList').innerHTML = '';
+
+                json.forEach((row, i) => {
+                    if (i < 5 || !row[0]) return;
+                    if (row[0] === 'Regular') addIngredientRow(row[1], row[2], row[3], row[4]);
+                    if (row[0] === 'Especial') addSpecialIngredientRow(row[1], row[4], row[4], row[2], row[3]);
+                });
+                calculateAll();
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const name = document.getElementById('recipeName').value || 'Receta Sin Nombre';
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(22);
+            doc.setTextColor(93, 92, 222);
+            doc.text("CULINARY CREATIONS", 20, 20);
+            
+            doc.setFontSize(12);
+            doc.setTextColor(100);
+            doc.text(`Reporte de Costos: ${name}`, 20, 30);
+            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 36);
+
+            doc.setDrawColor(93, 92, 222);
+            doc.line(20, 40, 190, 40);
+
+            // Resumen Financiero
+            doc.setFontSize(14);
+            doc.setTextColor(0);
+            doc.text("Resumen Financiero", 20, 50);
+            doc.setFontSize(10);
+            doc.text(`Costo Total: ${document.getElementById('totalCosts').textContent}`, 20, 58);
+            doc.text(`Precio Venta Sugerido: ${document.getElementById('sellingPrice').textContent}`, 20, 64);
+            doc.text(`Masa Total: ${document.getElementById('totalMass').textContent} g/ml`, 20, 70);
+
+            doc.save(`${name.replace(/\s/g, '_')}_Reporte.pdf`);
+        }
+    </script>
 </body>
 </html>
