@@ -461,6 +461,14 @@
             doc.text(`Masa Total: ${document.getElementById('totalMass').textContent} g/ml`, 20, 70);
 
             doc.save(`${name.replace(/\s/g, '_')}_Reporte.pdf`);
+            // --- Registro del Service Worker para Modo Offline ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+            .then(reg => console.log('KAITO 💙: ¡Service Worker listo para la función!', reg.scope))
+            .catch(err => console.error('KAITO 💙: Ups, algo falló en el registro.', err));
+    });
+}
         }
     </script>
 </body>
