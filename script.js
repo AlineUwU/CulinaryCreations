@@ -83,15 +83,16 @@ function addSpecialIngredientRow(name = '', pkgPrice = '', pkgContent = '', used
     if(!container) return;
 
     const row = document.createElement('div');
-    row.className = 'special-ingredient-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center py-3 md:py-2 bg-orange-50 dark:bg-gray-700 px-2 rounded-lg border border-orange-100 dark:border-gray[...];
+    // Usamos 12 columnas en md para mantener compatibilidad con addIngredientRow
+    row.className = 'special-ingredient-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center py-3 md:py-2 bg-orange-50 dark:bg-gray-700 px-2 rounded-lg border border-orange-100 dark:border-orange-600 shadow-sm mb-2';
     
-    // Nota: Usamos divs contenedores para el diseño responsive, pero buscaremos los inputs dentro
+    // Diseño responsivo: distribuimos las columnas en md (12)
     row.innerHTML = `
-        <div class="col-span-1 md:col-span-3 flex flex-col"><label class="md:hidden text-xs text-gray-500">Nombre</label><input type="text" class="px-2 py-1 border rounded bg-transparent dark:text[...]"></div>
-        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Precio Paq.</label><input type="number" class="px-2 py-1 border rounded bg-transparent da[...]"></div>
-        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cont. Paq</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark[...]"></div>
-        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cant. Usada</label><input type="number" class="px-2 py-1 border rounded bg-transparent da[...]"></div>
-        <div class="col-span-1 md:col-span-2 flex justify-between items-center md:justify-end"><label class="md:hidden text-xs text-gray-500 font-bold">Costo:</label><span class="text-xs font-bold[...]"></div>
+        <div class="col-span-1 md:col-span-3 flex flex-col"><label class="md:hidden text-xs text-gray-500">Nombre</label><input type="text" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full" placeholder="Nombre" value="${name}"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Precio Paq.</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full" placeholder="$" value="${pkgPrice}" min="0" step="0.01"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cont. Paq</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full" placeholder="Contenido" value="${pkgContent}" min="0" step="0.01"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cant. Usada</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full" placeholder="Usada" value="${used}" min="0" step="0.01"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col items-end md:items-end"><label class="md:hidden text-xs text-gray-500 font-bold">Costo:</label><span class="text-xs font-bold proportional-cost">$0.00</span><span class="text-xs font-bold ml-2 special-cost-display">$0.00</span></div>
         <button class="col-span-1 md:col-span-1 text-red-500 hover:text-red-700 font-bold text-center remove-special-ingredient">✕</button>
     `;
     
@@ -139,6 +140,10 @@ function calculateAll() {
             const display = row.querySelector('.special-cost-display');
             if(display) display.textContent = '$' + total.toFixed(2);
             
+            // Also update proportional-cost if present
+            const prop = row.querySelector('.proportional-cost');
+            if(prop) prop.textContent = '$' + total.toFixed(2);
+
             totalIngredientsCost += total;
         }
     });
@@ -147,8 +152,8 @@ function calculateAll() {
     updateText('totalIngredientsCost', '$' + totalIngredientsCost.toFixed(2));
 
     const units = parseFloat(getValueOrZero('unitsYield')) || 1;
-    const addedPercent = parseFloat(getValueOrZero('addedPercentage'));
-    const profitPercent = parseFloat(getValueOrZero('profitPercentage'));
+    const addedPercent = parseFloat(getValueOrZero('addedPercentage')) || 0;
+    const profitPercent = parseFloat(getValueOrZero('profitPercentage')) || 0;
 
     const addedAmount = totalIngredientsCost * (addedPercent / 100);
     const totalCosts = totalIngredientsCost + addedAmount;
