@@ -13,50 +13,36 @@ const FILES_TO_CACHE = [
 
 // Instalar y cachear los archivos
 self.addEventListener('install', event => {
-  console.log('🛠 SW: Instalando...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('📦 SW: Cacheando archivos...');
-        return cache.addAll(FILES_TO_CACHE);
-      })
-      .catch(error => {
-        console.error('❌ SW: Error cacheando archivos:', error);
+        console.log('KAITO 💙: Guardando herramientas en el caché para uso offline...');
+        return cache.addAll(urlsToCache);
       })
   );
 });
 
-// Activar y limpiar cachés antiguos
+// Activación: Limpiamos versiones antiguas del caché
 self.addEventListener('activate', event => {
-  console.log('✅ SW: Activado');
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME) {
-            console.log('🧹 SW: Borrando caché antigua:', key);
-            return caches.delete(key);
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
           }
         })
-      )
-    )
+      );
+    })
   );
 });
 
-// Interceptar peticiones
+// Estrategia: Intentar cargar de la red, si falla, usar el caché
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-
-  console.log('🔄 SW: Interceptando →', event.request.url);
-
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request).catch(() => {
-          if (event.request.mode === 'navigate') {
-            return caches.match('index.html');
-          }
-        });
+        return response || fetch(event.request);
       })
   );
 });
