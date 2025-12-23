@@ -83,15 +83,15 @@ function addSpecialIngredientRow(name = '', pkgPrice = '', pkgContent = '', used
     if(!container) return;
 
     const row = document.createElement('div');
-    row.className = 'special-ingredient-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center py-3 md:py-2 bg-orange-50 dark:bg-gray-700 px-2 rounded-lg border border-orange-100 dark:border-gray-600 shadow-sm mb-2';
+    row.className = 'special-ingredient-row grid grid-cols-1 md:grid-cols-12 gap-2 items-center py-3 md:py-2 bg-orange-50 dark:bg-gray-700 px-2 rounded-lg border border-orange-100 dark:border-gray[...];
     
     // Nota: Usamos divs contenedores para el diseño responsive, pero buscaremos los inputs dentro
     row.innerHTML = `
-        <div class="col-span-1 md:col-span-3 flex flex-col"><label class="md:hidden text-xs text-gray-500">Nombre</label><input type="text" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-gray-500 text-sm w-full" placeholder="Nombre" value="${name}"></div>
-        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Precio Paq.</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-gray-500 text-sm w-full" placeholder="$" value="${pkgPrice}" min="0" step="0.01"></div>
-        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cont. Paq</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-gray-500 text-sm w-full" placeholder="Cont." value="${pkgContent}" min="0" step="0.01"></div>
-        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cant. Usada</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-gray-500 text-sm w-full" placeholder="Usado" value="${used}" min="0" step="0.01"></div>
-        <div class="col-span-1 md:col-span-2 flex justify-between items-center md:justify-end"><label class="md:hidden text-xs text-gray-500 font-bold">Costo:</label><span class="text-xs font-bold text-orange-700 dark:text-orange-300 row-total special-cost-display">$0.00</span></div>
+        <div class="col-span-1 md:col-span-3 flex flex-col"><label class="md:hidden text-xs text-gray-500">Nombre</label><input type="text" class="px-2 py-1 border rounded bg-transparent dark:text[...]"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Precio Paq.</label><input type="number" class="px-2 py-1 border rounded bg-transparent da[...]"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cont. Paq</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark[...]"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cant. Usada</label><input type="number" class="px-2 py-1 border rounded bg-transparent da[...]"></div>
+        <div class="col-span-1 md:col-span-2 flex justify-between items-center md:justify-end"><label class="md:hidden text-xs text-gray-500 font-bold">Costo:</label><span class="text-xs font-bold[...]"></div>
         <button class="col-span-1 md:col-span-1 text-red-500 hover:text-red-700 font-bold text-center remove-special-ingredient">✕</button>
     `;
     
@@ -257,10 +257,11 @@ function importFromExcel(inputElement) {
 
 // --- 5. PDF (Restaurado y Adaptado para el nuevo HTML) ---
 function exportToPDF() {
-    if(typeof window.jspdf === 'undefined') { alert("Librería jsPDF no cargada."); return; }
+    // Compatibilidad con diferentes bundles de jsPDF
+    const JsPDFClass = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : (window.jsPDF ? window.jsPDF : null);
+    if (!JsPDFClass) { alert("Librería jsPDF no cargada."); return; }
     
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF();
+    const pdf = new JsPDFClass();
     const currentDate = new Date().toLocaleDateString('es-ES');
     const recipeName = document.getElementById('recipeName') ? document.getElementById('recipeName').value : 'Sin Nombre';
 
@@ -385,6 +386,18 @@ function exportToPDF() {
     pdf.text(`PRECIO VENTA: ${getData('sellingPrice')}`, 20, yPosition);
     
     pdf.save(`Resumen_${recipeName.replace(/ /g, "_")}.pdf`);
+}
+
+// Función faltante: toggleDarkMode
+function toggleDarkMode(force) {
+    if (typeof force === 'boolean') {
+        document.documentElement.classList.toggle('dark', force);
+    } else {
+        document.documentElement.classList.toggle('dark');
+    }
+    try {
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    } catch(e) { /* no persistir si storage no disponible */ }
 }
 
 // Globales
