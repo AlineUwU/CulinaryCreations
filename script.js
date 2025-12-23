@@ -152,6 +152,7 @@ function addSpecialIngredientRow(name = '', pkgPrice = '', pkgContent = '', used
         <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Precio Paq.</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full" placeholder="$" value="${pkgPrice}" min="0" step="0.01"></div>
         <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cont. Paq</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full" placeholder="Contenido" value="${pkgContent}" min="0" step="0.01"></div>
         <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Cant. Usada</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full" placeholder="Usada" value="${used}" min="0" step="0.01"></div>
+        <div class="col-span-1 md:col-span-2 flex flex-col"><label class="md:hidden text-xs text-gray-500">Masa (g/ml)</label><input type="number" class="px-2 py-1 border rounded bg-transparent dark:text-white dark:border-orange-600 text-sm w-full special-mass" placeholder="Masa" value="${mass}" min="0" step="0.01"></div>
         <div class="col-span-1 md:col-span-2 flex flex-col items-end md:items-end"><label class="md:hidden text-xs text-gray-500 font-bold">Costo:</label><span class="text-xs font-bold proportional-cost">$0.00</span><span class="text-xs font-bold ml-2 special-cost-display">$0.00</span></div>
         <button class="col-span-1 md:col-span-1 text-red-500 hover:text-red-700 font-bold text-center remove-special-ingredient">✕</button>
     `;
@@ -170,6 +171,7 @@ function addSpecialIngredientRow(name = '', pkgPrice = '', pkgContent = '', used
 // --- 3. Lógica de Cálculo ---
 function calculateAll() {
     let totalIngredientsCost = 0;
+    let totalMass = 0;
     
     // Regulares
     document.querySelectorAll('.ingredient-row').forEach(row => {
@@ -182,6 +184,10 @@ function calculateAll() {
             const display = row.querySelector('.cost-display');
             if(display) display.textContent = '$' + total.toFixed(2);
             
+            // Sumar masa (campo índice 2)
+            const mass = parseFloat(inputs[2].value) || 0;
+            totalMass += mass;
+
             totalIngredientsCost += total;
         }
     });
@@ -189,27 +195,43 @@ function calculateAll() {
     // Especiales
     document.querySelectorAll('.special-ingredient-row').forEach(row => {
         const inputs = row.querySelectorAll('input');
-        if(inputs.length >= 4) {
-            const pkgPrice = parseFloat(inputs[1].value) || 0;
-            const pkgContent = parseFloat(inputs[2].value) || 1;
-            const used = parseFloat(inputs[3].value) || 0;
-            
-            let total = 0;
-            if(pkgContent > 0) total = (pkgPrice / pkgContent) * used;
+        // precio paquete / contenido / usado (índices variables)
+        const pkgPrice = parseFloat(inputs[1]?.value) || 0;
+        const pkgContent = parseFloat(inputs[2]?.value) || 1;
+        const used = parseFloat(inputs[3]?.value) || 0;
 
-            const display = row.querySelector('.special-cost-display');
-            if(display) display.textContent = '$' + total.toFixed(2);
-            
-            // Also update proportional-cost if present
-            const prop = row.querySelector('.proportional-cost');
-            if(prop) prop.textContent = '$' + total.toFixed(2);
+        let total = 0;
+        if(pkgContent > 0) total = (pkgPrice / pkgContent) * used;
 
-            totalIngredientsCost += total;
+        const display = row.querySelector('.special-cost-display');
+        if(display) display.textContent = '$' + total.toFixed(2);
+
+        // Para la masa: puede estar en inputs[4] (filas del HTML) o en un input con clase .special-mass
+        let specialMass = 0;
+        if (inputs.length >= 5) {
+            specialMass = parseFloat(inputs[4].value) || 0;
+        } else {
+            const mEl = row.querySelector('.special-mass');
+            if (mEl) specialMass = parseFloat(mEl.value) || 0;
         }
+        totalMass += specialMass;
+
+        // actualizar proportional-cost si existe
+        const prop = row.querySelector('.proportional-cost');
+        if(prop) prop.textContent = '$' + total.toFixed(2);
+
+        totalIngredientsCost += total;
     });
 
     // Totales Generales
     updateText('totalIngredientsCost', '$' + totalIngredientsCost.toFixed(2));
+
+    // Actualizar resumen de masa (mostrar sin decimales si es entero)
+    const totalMassEl = document.getElementById('totalMass');
+    if (totalMassEl) {
+        const formatted = Number.isInteger(totalMass) ? String(totalMass) : totalMass.toFixed(2);
+        totalMassEl.textContent = formatted;
+    }
 
     const units = parseFloat(getValueOrZero('unitsYield')) || 1;
     const addedPercent = parseFloat(getValueOrZero('addedPercentage')) || 0;
@@ -262,10 +284,11 @@ function exportToExcel() {
     });
 
     const specData = [["--- INGREDIENTES ESPECIALES ---", "", "", "", ""]];
-    specData.push(["Ingrediente", "Precio Paquete", "Contenido Paq.", "Cantidad Usada"]);
+    specData.push(["Ingrediente", "Precio Paquete", "Contenido Paq.", "Cantidad Usada", "Masa"]);
     document.querySelectorAll('.special-ingredient-row').forEach(row => {
         const inputs = row.querySelectorAll('input');
-        if(inputs.length >= 4) specData.push([inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value]);
+        const massVal = inputs[4]?.value || row.querySelector('.special-mass')?.value || '';
+        if(inputs.length >= 4) specData.push([inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, massVal]);
     });
 
     const finalSheetData = [...configData, [], ...regData, [], ...specData];
@@ -310,7 +333,7 @@ function importFromExcel(inputElement) {
                 if(row[0]) addIngredientRow(row[0], row[1], row[2], row[3]);
             }
             else if(section === 'special') {
-                if(row[0]) addSpecialIngredientRow(row[0], row[1], row[2], row[3]);
+                if(row[0]) addSpecialIngredientRow(row[0], row[1], row[2], row[3], row[4]);
             }
         });
         calculateAll();
@@ -397,6 +420,7 @@ function exportToPDF() {
         pdf.text('Precio Paq.', 70, yPosition); // Ajusté un poco las posiciones
         pdf.text('Cont.', 100, yPosition);
         pdf.text('Usado', 130, yPosition);
+        pdf.text('Masa', 150, yPosition);
         pdf.text('Total', 170, yPosition);
         pdf.line(20, yPosition + 2, 190, yPosition + 2);
         yPosition += 8;
@@ -410,6 +434,7 @@ function exportToPDF() {
                 const pkgPrice = inputs[1].value || '0';
                 const pkgCont = inputs[2].value || '0';
                 const used = inputs[3].value || '0';
+                const mass = inputs[4]?.value || row.querySelector('.special-mass')?.value || '0';
                 const total = row.querySelector('.special-cost-display').textContent;
 
                 if (yPosition > 270) { pdf.addPage(); yPosition = 25; }
@@ -418,57 +443,12 @@ function exportToPDF() {
                 pdf.text(`$${pkgPrice}`, 70, yPosition);
                 pdf.text(pkgCont, 100, yPosition);
                 pdf.text(used, 130, yPosition);
+                pdf.text(mass, 150, yPosition);
                 pdf.text(total, 170, yPosition);
                 yPosition += 8;
             }
         });
-    }
+    });
 
-    // Totales
-    yPosition += 10;
-    if (yPosition > 250) { pdf.addPage(); yPosition = 25; }
-    pdf.line(20, yPosition, 190, yPosition);
-    yPosition += 10;
 
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(14);
-    pdf.text('ANÁLISIS FINANCIERO', 20, yPosition);
-    yPosition += 10;
-    pdf.setFontSize(10);
-    pdf.setFont("helvetica", "normal");
 
-    const getData = (id) => document.getElementById(id) ? document.getElementById(id).textContent : '$0.00';
-    
-    pdf.text(`Costo Ingredientes: ${getData('totalIngredientsCost')}`, 20, yPosition); yPosition += 6;
-    pdf.text(`Margen Error: ${getData('addedAmount')}`, 20, yPosition); yPosition += 6;
-    pdf.text(`Costo Total: ${getData('totalCosts')}`, 20, yPosition); yPosition += 6;
-    pdf.text(`Costo Unitario: ${getData('unitCost')}`, 20, yPosition); yPosition += 6;
-    pdf.text(`Ganancia Unitaria: ${getData('profitPerUnit')}`, 20, yPosition); yPosition += 10;
-    
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(14);
-    pdf.setTextColor(93, 92, 222); // Color primary (tipo morado/azul)
-    pdf.text(`PRECIO VENTA: ${getData('sellingPrice')}`, 20, yPosition);
-    
-    pdf.save(`Resumen_${recipeName.replace(/ /g, "_")}.pdf`);
-}
-
-// Función faltante: toggleDarkMode
-function toggleDarkMode(force) {
-    if (typeof force === 'boolean') {
-        document.documentElement.classList.toggle('dark', force);
-    } else {
-        document.documentElement.classList.toggle('dark');
-    }
-    try {
-        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    } catch(e) { /* no persistir si storage no disponible */ }
-}
-
-// Globales
-window.toggleDarkMode = toggleDarkMode;
-window.exportToExcel = exportToExcel;
-window.importFromExcel = importFromExcel;
-window.addIngredientRow = addIngredientRow;
-window.addSpecialIngredientRow = addSpecialIngredientRow;
-window.exportToPDF = exportToPDF;
