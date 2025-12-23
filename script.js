@@ -40,6 +40,64 @@ function initializeEventListeners() {
     if(pdfBtn) pdfBtn.addEventListener('click', exportToPDF);
 
     attachRowListeners();
+
+    // --- Delegación y soporte para botones de "X" existentes ---
+    // Delegación para eliminar ingredientes regulares (funciona para filas existentes y nuevas)
+    const ingredientsList = document.getElementById('ingredientsList');
+    if (ingredientsList) {
+        ingredientsList.addEventListener('click', (e) => {
+            const btn = e.target.closest('.remove-ingredient');
+            if (!btn) return;
+            const row = btn.closest('.ingredient-row');
+            if (row) {
+                row.remove();
+                calculateAll();
+            }
+        });
+
+        // Fallback: attach click listeners to any existing buttons (por compatibilidad con ejecuciones dobles)
+        ingredientsList.querySelectorAll('.remove-ingredient').forEach(btn => {
+            btn.removeEventListener('click', fallbackRemoveIngredient);
+            btn.addEventListener('click', fallbackRemoveIngredient);
+        });
+    }
+
+    // Delegación para eliminar ingredientes especiales
+    const specialList = document.getElementById('specialIngredientsList');
+    if (specialList) {
+        specialList.addEventListener('click', (e) => {
+            const btn = e.target.closest('.remove-special-ingredient');
+            if (!btn) return;
+            const row = btn.closest('.special-ingredient-row');
+            if (row) {
+                row.remove();
+                calculateAll();
+            }
+        });
+
+        // Fallback para botones existentes
+        specialList.querySelectorAll('.remove-special-ingredient').forEach(btn => {
+            btn.removeEventListener('click', fallbackRemoveSpecialIngredient);
+            btn.addEventListener('click', fallbackRemoveSpecialIngredient);
+        });
+    }
+}
+
+function fallbackRemoveIngredient(e) {
+    const btn = e.currentTarget;
+    const row = btn.closest('.ingredient-row');
+    if (row) {
+        row.remove();
+        calculateAll();
+    }
+}
+function fallbackRemoveSpecialIngredient(e) {
+    const btn = e.currentTarget;
+    const row = btn.closest('.special-ingredient-row');
+    if (row) {
+        row.remove();
+        calculateAll();
+    }
 }
 
 function attachRowListeners() {
@@ -69,6 +127,8 @@ function addIngredientRow(name = '', qty = '', mass = '', cost = '') {
     
     container.appendChild(row);
     
+    // No es estrictamente necesario añadir un listener aquí porque usamos delegación,
+    // pero mantener por compatibilidad con llamadas directas.
     row.querySelector('.remove-ingredient').addEventListener('click', () => {
         row.remove();
         calculateAll();
