@@ -46,7 +46,10 @@ function initializeEventListeners() {
     const ingredientsList = document.getElementById('ingredientsList');
     if (ingredientsList) {
         ingredientsList.addEventListener('click', (e) => {
-            const btn = e.target.closest('.remove-ingredient');
+            const targetEl = (e.target instanceof Element) ? e.target
+                : (e.composedPath ? e.composedPath().find(n => n instanceof Element) : null);
+            if (!targetEl) return;
+            const btn = targetEl.closest('.remove-ingredient');
             if (!btn) return;
             const row = btn.closest('.ingredient-row');
             if (row) {
@@ -66,7 +69,10 @@ function initializeEventListeners() {
     const specialList = document.getElementById('specialIngredientsList');
     if (specialList) {
         specialList.addEventListener('click', (e) => {
-            const btn = e.target.closest('.remove-special-ingredient');
+            const targetEl = (e.target instanceof Element) ? e.target
+                : (e.composedPath ? e.composedPath().find(n => n instanceof Element) : null);
+            if (!targetEl) return;
+            const btn = targetEl.closest('.remove-special-ingredient');
             if (!btn) return;
             const row = btn.closest('.special-ingredient-row');
             if (row) {
@@ -81,6 +87,24 @@ function initializeEventListeners() {
             btn.addEventListener('click', fallbackRemoveSpecialIngredient);
         });
     }
+
+    // Document-level capture fallback: robusto ante casos raros (text nodes, race conditions)
+    // Se ejecuta en la fase de captura para adelantarse a handlers de bubble si fuese necesario
+    document.addEventListener('click', (e) => {
+        const targetEl = (e.target instanceof Element) ? e.target
+            : (e.composedPath ? e.composedPath().find(n => n instanceof Element) : null);
+        if (!targetEl) return;
+        const btn = targetEl.closest('.remove-ingredient, .remove-special-ingredient');
+        if (!btn) return;
+        // Evitar ejecutar si ya removió el row (por ejemplo si otro handler ya lo hizo)
+        const ingredientRow = btn.closest('.ingredient-row');
+        const specialRow = btn.closest('.special-ingredient-row');
+        const row = ingredientRow || specialRow;
+        if (row && row.parentElement) {
+            row.remove();
+            calculateAll();
+        }
+    }, true);
 }
 
 function fallbackRemoveIngredient(e) {
@@ -450,5 +474,51 @@ function exportToPDF() {
         });
     });
 
+    // Totales
+    yPosition += 10;
+    if (yPosition > 250) { pdf.addPage(); yPosition = 25; }
+    pdf.line(20, yPosition, 190, yPosition);
+    yPosition += 10;
 
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(14);
+    pdf.text('ANÁLISIS FINANCIERO', 20, yPosition);
+    yPosition += 10;
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
 
+    const getData = (id) => document.getElementById(id) ? document.getElementById(id).textContent : '$0.00';
+    
+    pdf.text(`Costo Ingredientes: ${getData('totalIngredientsCost')}`, 20, yPosition); yPosition += 6;
+    pdf.text(`Margen Error: ${getData('addedAmount')}`, 20, yPosition); yPosition += 6;
+    pdf.text(`Costo Total: ${getData('totalCosts')}`, 20, yPosition); yPosition += 6;
+    pdf.text(`Costo Unitario: ${getData('unitCost')}`, 20, yPosition); yPosition += 6;
+    pdf.text(`Ganancia Unitaria: ${getData('profitPerUnit')}`, 20, yPosition); yPosition += 10;
+    
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(14);
+    pdf.setTextColor(93, 92, 222); // Color primary (tipo morado/azul)
+    pdf.text(`PRECIO VENTA: ${getData('sellingPrice')}`, 20, yPosition);
+    
+    pdf.save(`Resumen_${recipeName.replace(/ /g, "_")}.pdf`);
+}
+
+// Función faltante: toggleDarkMode
+function toggleDarkMode(force) {
+    if (typeof force === 'boolean') {
+        document.documentElement.classList.toggle('dark', force);
+    } else {
+        document.documentElement.classList.toggle('dark');
+    }
+    try {
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    } catch(e) { /* no persistir si storage no disponible */ }
+}
+
+// Globales
+window.toggleDarkMode = toggleDarkMode;
+window.exportToExcel = exportToExcel;
+window.importFromExcel = importFromExcel;
+window.addIngredientRow = addIngredientRow;
+window.addSpecialIngredientRow = addSpecialIngredientRow;
+window.exportToPDF = exportToPDF;

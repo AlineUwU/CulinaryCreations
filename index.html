@@ -59,25 +59,25 @@
                     <div id="ingredientsList" class="space-y-2">
                         <!-- Ingredientes iniciales -->
                         <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="Producto lácteo">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="5" min="0" step="0.1">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="1000" min="0" step="0.1">
+                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="P[...]">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="5" min="0" step="0.01">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="1000" min="0" step="0.01">
                             <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="12" min="0" step="0.01">
                             <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$60.00</span>
                             <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
                         </div>
                         <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="Leche en polvo">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.1">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="120" min="0" step="0.1">
+                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="L[...]">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.01">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="120" min="0" step="0.01">
                             <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="20" min="0" step="0.01">
                             <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$20.00</span>
                             <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
                         </div>
                         <div class="ingredient-row grid grid-cols-12 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="Crema para batir">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.1">
-                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="500" min="0" step="0.1">
+                            <input type="text" class="col-span-4 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Nombre del ingrediente" value="C[...]">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="Cant." value="1" min="0" step="0.01">
+                            <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="ml/g" value="500" min="0" step="0.01">
                             <input type="number" class="col-span-2 px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" placeholder="$0.00" value="50" min="0" step="0.01">
                             <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 cost-display">$50.00</span>
                             <button class="col-span-1 text-red-500 hover:text-red-700 remove-ingredient p-1">✕</button>
@@ -113,11 +113,11 @@
                     <div id="specialIngredientsList" class="space-y-2">
                         <!-- Ejemplo inicial: Grenetina -->
                         <div class="special-ingredient-row grid grid-cols-16 gap-2 items-center py-2 rounded-lg">
-                            <input type="text" class="col-span-4 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="Nombre del ingrediente" value="Grenetina">
+                            <input type="text" class="col-span-4 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="Nombre del [...]">
                             <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="$0.00" value="80" min="0" step="0.01">
-                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="250g" value="250" min="0" step="0.1">
-                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="7g" value="7" min="0" step="0.1">
-                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="ml/g" value="7" min="0" step="0.1">
+                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="250" value="250" min="0" step="0.01">
+                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="7" value="7" min="0" step="0.01">
+                            <input type="number" class="col-span-2 px-3 py-2 border border-orange-300 dark:border-orange-600 rounded-lg text-base bg-white dark:bg-gray-700" placeholder="Masa" value="7" min="0" step="0.01">
                             <span class="col-span-2 text-sm font-medium text-orange-700 dark:text-orange-300 proportional-cost">$2.24</span>
                             <span class="col-span-1 text-sm font-medium text-gray-700 dark:text-gray-300 special-cost-display">$2.24</span>
                             <button class="col-span-1 text-red-500 hover:text-red-700 remove-special-ingredient p-1">✕</button>
@@ -138,11 +138,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">% Añadido</label>
-                            <input type="number" id="addedPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="30" min="0" step="0.1">
+                            <input type="number" id="addedPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="30" min="0" step="0.01">
                         </div>
                         <div>
                             <label class="block text-sm font-medium mb-2">% Beneficio esperado</label>
-                            <input type="number" id="profitPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="150" min="0" step="0.1">
+                            <input type="number" id="profitPercentage" class="w-full px-3 py-2 border rounded-lg text-base bg-white dark:bg-gray-700 dark:border-gray-600" value="150" min="0" step="0.01">
                         </div>
                     </div>
                 </div>
@@ -210,7 +210,6 @@
     </div>
 
      <script src="script.js" defer></script>
-<script src="script.js" defer></script>
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./service-worker.js')
