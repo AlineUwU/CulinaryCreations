@@ -43,7 +43,6 @@
             outline: none;
             box-shadow: 0 0 0 2px rgba(93, 92, 222, 0.2);
         }
-        /* Estilos personalizados para inputs */
         input[type="number"]::-webkit-inner-spin-button,
         input[type="number"]::-webkit-outer-spin-button {
             -webkit-appearance: none;
@@ -53,14 +52,12 @@
 </head>
 <body class="bg-pastelPink dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen pb-10">
 
-    <!-- Botón Modo Oscuro -->
     <button onclick="toggleDarkMode()" class="fixed top-4 right-4 z-50 bg-white dark:bg-gray-800 p-3 rounded-full shadow-lg hover:scale-110 transition active:scale-95">
         <span class="dark:hidden">🌙</span>
         <span class="hidden dark:inline">☀️</span>
     </button>
 
     <div class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Header -->
         <header class="text-center mb-10">
             <h1 class="text-4xl font-bold text-primary mb-2">Culinary Creations 💙</h1>
             <p class="text-gray-600 dark:text-gray-400">Tu asistente profesional para el costeo de recetas</p>
@@ -70,9 +67,7 @@
         </header>
 
         <div class="grid lg:grid-cols-3 gap-8">
-            <!-- Sección de Ingredientes -->
             <div class="lg:col-span-2 space-y-8">
-                
                 <!-- Ingredientes Regulares -->
                 <section class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                     <div class="flex justify-between items-center mb-6">
@@ -84,19 +79,16 @@
                         </button>
                     </div>
 
-                    <!-- Header Tabla (Desktop) -->
                     <div class="hidden md:grid grid-cols-12 gap-4 mb-4 text-xs font-bold text-gray-400 uppercase tracking-wider px-2">
                         <div class="col-span-4">Ingrediente</div>
                         <div class="col-span-2 text-center">Cantidad</div>
-                        <div class="col-span-2 text-center">Masa (g/ml)</div>
+                        <div class="col-span-2 text-center">Masa Unit. (g/ml)</div>
                         <div class="col-span-2 text-center">Costo Unit.</div>
                         <div class="col-span-1 text-right">Total</div>
                         <div class="col-span-1"></div>
                     </div>
 
-                    <div id="ingredientsList" class="space-y-3">
-                        <!-- Las filas se generan aquí -->
-                    </div>
+                    <div id="ingredientsList" class="space-y-3"></div>
                 </section>
 
                 <!-- Ingredientes Especiales -->
@@ -106,20 +98,17 @@
                             <h2 class="text-xl font-bold text-orange-800 dark:text-orange-200 flex items-center gap-2">
                                 <span>✨</span> Ingredientes Especiales
                             </h2>
-                            <p class="text-xs text-orange-600 dark:text-orange-400">Para granel: $Precio por Contenido, usas Cantidad.</p>
+                            <p class="text-xs text-orange-600 dark:text-orange-400">Precio se calcula por paquete. Masa se suma directo.</p>
                         </div>
                         <button onclick="addSpecialIngredientRow()" class="bg-orange-600 text-white px-4 py-2 rounded-xl hover:opacity-90 transition active:scale-95 text-sm font-semibold">
                             + Especial
                         </button>
                     </div>
 
-                    <div id="specialIngredientsList" class="space-y-4">
-                        <!-- Las filas especiales se generan aquí -->
-                    </div>
+                    <div id="specialIngredientsList" class="space-y-4"></div>
                 </section>
             </div>
 
-            <!-- Panel de Resultados -->
             <div class="space-y-6">
                 <!-- Configuración -->
                 <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
@@ -135,7 +124,7 @@
                                 <input type="number" id="addedPercentage" class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-700 border-none font-bold" value="10" min="0">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">% Beneficio</label>
+                                <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">% Beneficio (Factor)</label>
                                 <input type="number" id="profitPercentage" class="w-full px-4 py-2 rounded-xl bg-gray-50 dark:bg-gray-700 border-none font-bold" value="100" min="0">
                             </div>
                         </div>
@@ -162,10 +151,6 @@
                             <span>Costo por Unidad:</span>
                             <span id="unitCost" class="font-bold">$0.00</span>
                         </div>
-                        <div class="flex justify-between text-green-300">
-                            <span>Ganancia por Unidad:</span>
-                            <span id="profitPerUnit" class="font-bold">$0.00</span>
-                        </div>
                         <div class="pt-4 mt-2 border-t border-white/20 text-center">
                             <div class="text-xs uppercase font-bold opacity-70 mb-1">Precio Sugerido Venta</div>
                             <div id="sellingPrice" class="text-4xl font-black">$0.00</div>
@@ -180,10 +165,9 @@
                         <span id="totalMass" class="text-3xl font-black text-primary">0</span>
                         <span class="text-gray-500 font-bold">g/ml</span>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-2">Suma de todos los pesos de ingredientes</p>
                 </div>
 
-                <!-- Acciones -->
+                <!-- Botones de Acción -->
                 <div class="grid grid-cols-1 gap-3">
                     <button onclick="exportToPDF()" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition flex items-center justify-center gap-2">
                         <span>📄</span> Exportar PDF
@@ -210,25 +194,31 @@
     </footer>
 
     <script>
-        // --- Estado Global ---
-        const state = {
-            ingredients: [],
-            specialIngredients: []
-        };
+        // --- Registro del Service Worker ---
+        if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('KAITO 💙: ¡Service Worker registrado!', reg.scope))
+                    .catch(err => console.error('KAITO 💙: Error al registrar SW:', err));
+            });
+        }
 
         // --- Inicialización ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Datos por defecto
-            addIngredientRow('Harina de Trigo', 1, 1000, 15);
-            addIngredientRow('Leche Entera', 0.5, 500, 22);
-            addSpecialIngredientRow('Grenetina', 80, 250, 7, 7);
+            // Ejemplo aleatorio para mostrar funcionalidad
+            document.getElementById('recipeName').value = ""; // Dejar nombre vacío o poner algo como "Nueva Receta"
+            
+            // Un solo ingrediente regular de ejemplo
+            addIngredientRow('Ej. Harina', 1, 1000, 18.50);
+            
+            // Un solo ingrediente especial de ejemplo
+            addSpecialIngredientRow('Ej. Esencia', 45, 120, 10, 10);
 
-            // Listeners globales
             ['unitsYield', 'addedPercentage', 'profitPercentage'].forEach(id => {
-                document.getElementById(id).addEventListener('input', calculateAll);
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', calculateAll);
             });
 
-            // Delegación de eventos para eliminar (Solución definitiva para la "X")
             document.addEventListener('click', (e) => {
                 const btn = e.target.closest('.remove-btn');
                 if (btn) {
@@ -246,7 +236,6 @@
             calculateAll();
         });
 
-        // --- Generación de Filas ---
         function addIngredientRow(name = '', qty = '', mass = '', cost = '') {
             const list = document.getElementById('ingredientsList');
             const row = document.createElement('div');
@@ -261,7 +250,7 @@
                     <input type="number" placeholder="0" value="${qty}" class="qty-input w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none text-center font-bold">
                 </div>
                 <div class="col-span-1 md:col-span-2 flex items-center gap-2">
-                    <span class="md:hidden text-[10px] font-bold text-gray-400">MASA:</span>
+                    <span class="md:hidden text-[10px] font-bold text-gray-400">MASA UNIT:</span>
                     <input type="number" placeholder="0" value="${mass}" class="mass-input w-full bg-white dark:bg-gray-800 px-2 py-1 rounded-lg border-none text-center font-bold">
                 </div>
                 <div class="col-span-1 md:col-span-2 flex items-center gap-2">
@@ -294,7 +283,7 @@
                     <input type="number" placeholder="0" value="${pkgPrice}" class="spec-price w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Contenido</label>
+                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Contenido Paq.</label>
                     <input type="number" placeholder="0" value="${pkgCont}" class="spec-cont w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
                 </div>
                 <div class="md:col-span-2">
@@ -302,7 +291,7 @@
                     <input type="number" placeholder="0" value="${used}" class="spec-used w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Masa (g)</label>
+                    <label class="block text-[10px] font-bold text-orange-400 mb-1 uppercase">Masa Aporte (g)</label>
                     <input type="number" placeholder="0" value="${mass}" class="spec-mass w-full bg-orange-50 dark:bg-gray-700 px-2 py-1 rounded-lg border-none font-bold text-center">
                 </div>
                 <div class="md:col-span-3 text-right">
@@ -319,60 +308,52 @@
             calculateAll();
         }
 
-        // --- Cálculos ---
         function calculateAll() {
             let totalIngredientsCost = 0;
             let totalMass = 0;
 
-            // Ingredientes Regulares
             document.querySelectorAll('.ingredient-row').forEach(row => {
                 const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
                 const cost = parseFloat(row.querySelector('.cost-input').value) || 0;
-                const mass = parseFloat(row.querySelector('.mass-input').value) || 0;
+                const massUnit = parseFloat(row.querySelector('.mass-input').value) || 0;
                 
                 const total = qty * cost;
                 row.querySelector('.row-total').textContent = `$${total.toFixed(2)}`;
                 
                 totalIngredientsCost += total;
-                totalMass += mass;
+                totalMass += (qty * massUnit);
             });
 
-            // Ingredientes Especiales
             document.querySelectorAll('.special-ingredient-row').forEach(row => {
                 const p = parseFloat(row.querySelector('.spec-price').value) || 0;
                 const c = parseFloat(row.querySelector('.spec-cont').value) || 1;
                 const u = parseFloat(row.querySelector('.spec-used').value) || 0;
-                const m = parseFloat(row.querySelector('.spec-mass').value) || 0;
+                const mTotal = parseFloat(row.querySelector('.spec-mass').value) || 0;
 
                 const total = (p / c) * u;
                 row.querySelector('.spec-total').textContent = `$${total.toFixed(2)}`;
                 
                 totalIngredientsCost += total;
-                totalMass += m;
+                totalMass += mTotal;
             });
 
-            // Resultados Finales
             const units = parseFloat(document.getElementById('unitsYield').value) || 1;
             const margin = parseFloat(document.getElementById('addedPercentage').value) || 0;
-            const profit = parseFloat(document.getElementById('profitPercentage').value) || 0;
+            const profitInput = parseFloat(document.getElementById('profitPercentage').value) || 0;
 
             const marginAmount = totalIngredientsCost * (margin / 100);
             const totalCosts = totalIngredientsCost + marginAmount;
             const unitCost = totalCosts / units;
-            const sellingPrice = unitCost * (1 + (profit / 100));
-            const profitPerUnit = sellingPrice - unitCost;
+            const sellingPrice = unitCost * (profitInput / 100);
 
-            // Actualizar UI
             document.getElementById('totalIngredientsCost').textContent = `$${totalIngredientsCost.toFixed(2)}`;
             document.getElementById('addedAmount').textContent = `$${marginAmount.toFixed(2)}`;
             document.getElementById('totalCosts').textContent = `$${totalCosts.toFixed(2)}`;
             document.getElementById('unitCost').textContent = `$${unitCost.toFixed(2)}`;
-            document.getElementById('profitPerUnit').textContent = `$${profitPerUnit.toFixed(2)}`;
             document.getElementById('sellingPrice').textContent = `$${sellingPrice.toFixed(2)}`;
             document.getElementById('totalMass').textContent = Math.round(totalMass);
         }
 
-        // --- Utilidades ---
         function toggleDarkMode() {
             document.documentElement.classList.toggle('dark');
         }
@@ -380,29 +361,23 @@
         function exportToExcel() {
             const recipeName = document.getElementById('recipeName').value || 'Receta';
             const wb = XLSX.utils.book_new();
-            
-            // Recopilar datos
             const data = [
-                ["Culinary Creations - Reporte de Costos"],
+                ["Culinary Creations - Reporte"],
                 ["Receta", recipeName],
                 ["Fecha", new Date().toLocaleDateString()],
                 [],
-                ["TIPO", "NOMBRE", "CANT/USADO", "MASA", "COSTO UNIT/PAQ", "SUBTOTAL"]
+                ["TIPO", "NOMBRE", "CANT/USADO", "MASA/APORTE", "COSTO UNIT", "SUBTOTAL"]
             ];
-
+            
             document.querySelectorAll('.ingredient-row').forEach(r => {
-                const inputs = r.querySelectorAll('input');
-                data.push(["Regular", inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, r.querySelector('.row-total').textContent]);
+                const i = r.querySelectorAll('input');
+                data.push(["Regular", i[0].value, i[1].value, i[2].value, i[3].value, r.querySelector('.row-total').textContent]);
             });
-
+            
             document.querySelectorAll('.special-ingredient-row').forEach(r => {
-                const inputs = r.querySelectorAll('input');
-                data.push(["Especial", inputs[0].value, inputs[3].value, inputs[4].value, inputs[1].value, r.querySelector('.spec-total').textContent]);
+                const i = r.querySelectorAll('input');
+                data.push(["Especial", i[0].value, i[3].value, i[4].value, "-", r.querySelector('.spec-total').textContent]);
             });
-
-            data.push([], ["RESUMEN FINAL"]);
-            data.push(["Costo Total", document.getElementById('totalCosts').textContent]);
-            data.push(["Precio Venta Sugerido", document.getElementById('sellingPrice').textContent]);
 
             const ws = XLSX.utils.aoa_to_sheet(data);
             XLSX.utils.book_append_sheet(wb, ws, "Costos");
@@ -418,15 +393,11 @@
                 const workbook = XLSX.read(data, {type: 'array'});
                 const sheet = workbook.Sheets[workbook.SheetNames[0]];
                 const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
-
-                // Limpiar actuales
                 document.getElementById('ingredientsList').innerHTML = '';
                 document.getElementById('specialIngredientsList').innerHTML = '';
-
                 json.forEach((row, i) => {
                     if (i < 5 || !row[0]) return;
                     if (row[0] === 'Regular') addIngredientRow(row[1], row[2], row[3], row[4]);
-                    if (row[0] === 'Especial') addSpecialIngredientRow(row[1], row[4], row[4], row[2], row[3]);
                 });
                 calculateAll();
             };
@@ -436,39 +407,175 @@
         function exportToPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            const name = document.getElementById('recipeName').value || 'Receta Sin Nombre';
+            const recipeName = document.getElementById('recipeName').value || 'Sin Nombre';
+            const date = new Date().toLocaleDateString();
 
+            // Configuración inicial
+            let y = 20;
+            const lineHeight = 7;
+            const pageHeight = doc.internal.pageSize.height;
+
+            // --- Header ---
+            doc.setFontSize(18);
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(22);
-            doc.setTextColor(93, 92, 222);
-            doc.text("CULINARY CREATIONS", 20, 20);
-            
+            doc.setTextColor(93, 92, 222); // Primary color
+            doc.text("CULINARY CREATIONS 💙", 105, y, { align: "center" });
+            y += 15;
+
             doc.setFontSize(12);
-            doc.setTextColor(100);
-            doc.text(`Reporte de Costos: ${name}`, 20, 30);
-            doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 20, 36);
-
-            doc.setDrawColor(93, 92, 222);
-            doc.line(20, 40, 190, 40);
-
-            // Resumen Financiero
-            doc.setFontSize(14);
-            doc.setTextColor(0);
-            doc.text("Resumen Financiero", 20, 50);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Receta: ${recipeName}`, 20, y);
+            y += 7;
             doc.setFontSize(10);
-            doc.text(`Costo Total: ${document.getElementById('totalCosts').textContent}`, 20, 58);
-            doc.text(`Precio Venta Sugerido: ${document.getElementById('sellingPrice').textContent}`, 20, 64);
-            doc.text(`Masa Total: ${document.getElementById('totalMass').textContent} g/ml`, 20, 70);
+            doc.text(`Fecha: ${date}`, 20, y);
+            y += 8;
 
-            doc.save(`${name.replace(/\s/g, '_')}_Reporte.pdf`);
-            // --- Registro del Service Worker para Modo Offline ---
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
-            .then(reg => console.log('KAITO 💙: ¡Service Worker listo para la función!', reg.scope))
-            .catch(err => console.error('KAITO 💙: Ups, algo falló en el registro.', err));
-    });
-}
+            // --- Parámetros de Configuración (Nueva Sección) ---
+            const units = document.getElementById('unitsYield').value || "1";
+            const margin = document.getElementById('addedPercentage').value || "0";
+            const profit = document.getElementById('profitPercentage').value || "0";
+
+            doc.setFontSize(9);
+            doc.setTextColor(80);
+            doc.text(`Configuración:`, 20, y);
+            doc.setFont("helvetica", "normal");
+            doc.text(`Rendimiento: ${units} uds.`, 45, y);
+            doc.text(`Margen: ${margin}%`, 85, y);
+            doc.text(`Beneficio: ${profit}%`, 120, y);
+            y += 10;
+
+            // Función para verificar salto de página
+            function checkPageBreak() {
+                if (y > pageHeight - 30) {
+                    doc.addPage();
+                    y = 20;
+                }
+            }
+
+            // --- Tabla Ingredientes Regulares ---
+            checkPageBreak();
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(0);
+            doc.text("INGREDIENTES REGULARES", 20, y);
+            y += 7;
+
+            // Encabezados Tabla
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text("Ingrediente", 20, y);
+            doc.text("Cant.", 90, y);
+            doc.text("Masa (g)", 110, y);
+            doc.text("Costo U.", 135, y);
+            doc.text("Total", 170, y);
+            doc.line(20, y + 2, 190, y + 2); // Línea separadora
+            y += 8;
+
+            doc.setTextColor(0);
+            doc.setFont("helvetica", "normal");
+
+            document.querySelectorAll('#ingredientsList .ingredient-row').forEach(row => {
+                checkPageBreak();
+                const inputs = row.querySelectorAll('input');
+                const name = inputs[0].value || "-";
+                const qty = inputs[1].value || "0";
+                const mass = inputs[2].value || "0";
+                const cost = inputs[3].value || "0";
+                const total = row.querySelector('.row-total').textContent;
+
+                doc.text(name.substring(0, 35), 20, y);
+                doc.text(qty, 90, y);
+                doc.text(mass, 110, y);
+                doc.text(`$${cost}`, 135, y);
+                doc.text(total, 170, y);
+                y += 6;
+            });
+            y += 10;
+
+            // --- Tabla Ingredientes Especiales ---
+            checkPageBreak();
+            doc.setFontSize(11);
+            doc.setFont("helvetica", "bold");
+            doc.text("INGREDIENTES ESPECIALES", 20, y);
+            y += 7;
+
+            // Encabezados Tabla Especiales
+            doc.setFontSize(9);
+            doc.setTextColor(100);
+            doc.text("Ingrediente", 20, y);
+            doc.text("Usado", 90, y);
+            doc.text("Masa (g)", 110, y);
+            doc.text("Total", 170, y);
+            doc.line(20, y + 2, 190, y + 2);
+            y += 8;
+
+            doc.setTextColor(0);
+            doc.setFont("helvetica", "normal");
+
+            document.querySelectorAll('#specialIngredientsList .special-ingredient-row').forEach(row => {
+                checkPageBreak();
+                const inputs = row.querySelectorAll('input');
+                const name = inputs[0].value || "-";
+                const used = inputs[3].value || "0";
+                const mass = inputs[4].value || "0";
+                const total = row.querySelector('.spec-total').textContent;
+
+                doc.text(name.substring(0, 35), 20, y);
+                doc.text(used, 90, y);
+                doc.text(mass, 110, y);
+                doc.text(total, 170, y);
+                y += 6;
+            });
+            y += 15;
+
+            // --- Resumen Financiero ---
+            checkPageBreak();
+            
+            // Cuadro de resumen
+            doc.setDrawColor(93, 92, 222);
+            doc.setLineWidth(0.5);
+            doc.rect(20, y, 170, 65); // Marco del resumen
+            
+            let boxY = y + 10;
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(93, 92, 222);
+            doc.text("RESUMEN FINANCIERO", 105, boxY, { align: "center" });
+            boxY += 10;
+
+            const summaryItems = [
+                ["Costo Ingredientes:", document.getElementById('totalIngredientsCost').textContent],
+                ["Margen de Seguridad:", document.getElementById('addedAmount').textContent],
+                ["Costo Total Receta:", document.getElementById('totalCosts').textContent],
+                ["Costo por Unidad:", document.getElementById('unitCost').textContent],
+                ["Masa Total:", document.getElementById('totalMass').textContent + " g/ml"]
+            ];
+
+            doc.setFontSize(10);
+            doc.setTextColor(0);
+            
+            summaryItems.forEach(item => {
+                doc.setFont("helvetica", "bold");
+                doc.text(item[0], 30, boxY);
+                doc.setFont("helvetica", "normal");
+                doc.text(item[1], 130, boxY);
+                boxY += 7;
+            });
+
+            // Precio Venta Destacado
+            boxY += 5;
+            doc.setFontSize(14);
+            doc.setTextColor(93, 92, 222);
+            doc.setFont("helvetica", "bold");
+            doc.text(`PRECIO VENTA SUGERIDO: ${document.getElementById('sellingPrice').textContent}`, 105, boxY, { align: "center" });
+
+            // --- Footer ---
+            doc.setFontSize(10);
+            doc.setTextColor(128, 128, 128);
+            doc.setFont("helvetica", "italic");
+            doc.text("Gracias por usar Culinary Creations 💙", 105, pageHeight - 15, { align: "center" });
+
+            doc.save(`${recipeName.replace(/\s/g, '_')}_Reporte.pdf`);
         }
     </script>
 </body>
